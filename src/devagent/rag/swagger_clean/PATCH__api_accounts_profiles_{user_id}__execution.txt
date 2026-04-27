@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: PATCH
+PATH: /api/accounts/profiles/{user_id}/
+TOOL: accounts_profiles_partial_update
+AUTH_REQUIRED: True

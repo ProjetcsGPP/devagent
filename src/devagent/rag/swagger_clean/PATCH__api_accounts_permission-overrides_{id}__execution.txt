@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: PATCH
+PATH: /api/accounts/permission-overrides/{id}/
+TOOL: accounts_permission_overrides_partial_update
+AUTH_REQUIRED: True

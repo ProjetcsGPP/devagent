@@ -1,0 +1,12 @@
+TYPE: INTENT
+
+SUMMARY:
+Logout da sessão atual
+
+DESCRIPTION:
+Encerra a sessão ativa e revoga o registro em AccountsSession.
+
+Requer que o frontend envie o cookie de sessão (`gpp_session_<APP>`) via `withCredentials: true` (axios) ou `credentials: 'include'` (fetch). Após o logout, o cookie deve ser removido pelo frontend.
+
+TAGS:
+['0 - Autenticação']

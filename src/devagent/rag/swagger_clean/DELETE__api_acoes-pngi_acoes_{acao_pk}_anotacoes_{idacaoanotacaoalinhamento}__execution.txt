@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: DELETE
+PATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/
+TOOL: acoes_pngi_acoes_anotacoes_destroy
+AUTH_REQUIRED: True

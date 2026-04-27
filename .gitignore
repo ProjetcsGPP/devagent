@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+venv/
+storage/*.json
+storage/*.index
+rag/swagger_clean/
+workspace/
+backend/
+frontend/

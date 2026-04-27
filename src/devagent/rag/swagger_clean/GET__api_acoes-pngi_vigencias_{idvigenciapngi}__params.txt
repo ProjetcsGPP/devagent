@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "idvigenciapngi", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este vigencia pngi."}]
+
+REQUEST_SCHEMA:
+{}

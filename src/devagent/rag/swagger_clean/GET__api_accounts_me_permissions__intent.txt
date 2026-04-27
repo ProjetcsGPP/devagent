@@ -1,0 +1,14 @@
+TYPE: INTENT
+
+SUMMARY:
+Permissões do usuário na app atual
+
+DESCRIPTION:
+Retorna a role e as permissões do usuário autenticado na aplicação da sessão atual (`app_context`).
+
+A autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.
+
+O `app_context` é resolvido pelo `AppContextMiddleware` a partir do cookie de sessão e da tabela `AccountsSession`. O resultado é gravado diretamente em `request.app_context` — este endpoint depende obrigatoriamente desse middleware estar ativo na requisição.
+
+TAGS:
+['1 - Usuários']

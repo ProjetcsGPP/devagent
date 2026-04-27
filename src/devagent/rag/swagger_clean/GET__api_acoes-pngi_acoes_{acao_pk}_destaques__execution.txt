@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/
+TOOL: acoes_pngi_acoes_destaques_list
+AUTH_REQUIRED: True

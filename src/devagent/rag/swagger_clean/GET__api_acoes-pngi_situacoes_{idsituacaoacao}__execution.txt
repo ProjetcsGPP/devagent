@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/situacoes/{idsituacaoacao}/
+TOOL: acoes_pngi_situacoes_retrieve
+AUTH_REQUIRED: True

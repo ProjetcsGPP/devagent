@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "app_slug", "in": "path", "required": true, "type": "string", "description": "Slug (código interno) da aplicação a deslogar (ex: `portal`, `sigef`)."}]
+
+REQUEST_SCHEMA:
+{}

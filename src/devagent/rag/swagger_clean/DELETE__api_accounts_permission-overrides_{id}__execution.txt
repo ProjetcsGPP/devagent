@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: DELETE
+PATH: /api/accounts/permission-overrides/{id}/
+TOOL: accounts_permission_overrides_destroy
+AUTH_REQUIRED: True

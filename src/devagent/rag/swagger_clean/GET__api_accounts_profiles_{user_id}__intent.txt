@@ -1,0 +1,10 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+APIs de UserProfile.
+
+TAGS:
+['1 - Usuários']
