@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/accounts/me/permissions/
+TOOL: accounts_me_permissions_retrieve
+AUTH_REQUIRED: True

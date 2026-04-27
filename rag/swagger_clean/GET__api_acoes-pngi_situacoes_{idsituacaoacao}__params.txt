@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "idsituacaoacao", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este situacao acao."}]
+
+REQUEST_SCHEMA:
+{}

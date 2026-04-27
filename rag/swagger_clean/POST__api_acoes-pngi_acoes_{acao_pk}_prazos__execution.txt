@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: POST
+PATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/
+TOOL: acoes_pngi_acoes_prazos_create
+AUTH_REQUIRED: True

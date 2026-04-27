@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: POST
+PATH: /api/accounts/login/
+TOOL: accounts_login_create
+AUTH_REQUIRED: True

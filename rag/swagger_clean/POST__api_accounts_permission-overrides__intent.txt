@@ -1,0 +1,16 @@
+TYPE: INTENT
+
+SUMMARY:
+Criar override de permissão
+
+DESCRIPTION:
+Cria um novo `UserPermissionOverride` para conceder ou revogar explicitamente uma permissão de um usuário.
+
+**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+**Impacto funcional:** a criação do override altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a persistência.
+
+TAGS:
+['1 - Usuários']

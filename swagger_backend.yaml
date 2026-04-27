@@ -1,0 +1,5085 @@
+openapi: 3.0.3
+info:
+  title: GPP Plataforma 2.0 — API
+  version: 2.0.0
+  description: |
+    ## Bem-vindo à API da Plataforma GPP 2.0
+
+    Esta documentação descreve todos os endpoints da API REST da Plataforma GPP 2.0.
+
+    ---
+
+    ## 🔐 Como autenticar
+
+    Todos os endpoints (exceto os da seção **0 - Autenticação**) exigem uma sessão ativa. Siga os passos abaixo antes de usar qualquer outro método:
+
+    1. Localize a seção **0 - Autenticação** no menu
+    2. Abra o endpoint **POST /api/accounts/login/**
+    3. Clique em **Try it out**
+    4. Preencha o body com suas credenciais:
+
+    ```json
+    {
+      "username": "seu.usuario",
+      "password": "sua_senha",
+      "app_context": "PORTAL"
+    }
+    ```
+
+    5. Clique em **Execute**
+    6. Aguarde o retorno **200 OK** — a sessão será criada automaticamente no browser
+    7. A partir deste momento, todos os endpoints estarão disponíveis nesta aba
+
+    > ⚠️ **Importante:** o login deve ser feito diretamente nesta página do Swagger. Sessões criadas externamente (Postman, scripts) não são compartilhadas com o browser.
+
+    ---
+
+    ## 🍪 Mecanismo de autenticação
+
+    A API utiliza **SessionAuthentication** com cookies HttpOnly por aplicação. O nome do cookie varia conforme o `app_context` usado no login: `gpp_session_PORTAL`, `gpp_session_CARGA_ORG_LOT`, `gpp_session_ACOES_PNGI`, etc. O browser envia o cookie correto automaticamente em todas as requisições desta aba.
+
+    ---
+
+    ## 📋 Estrutura dos módulos
+
+    | Seção | Descrição |
+    |---|---|
+    | **0 - Autenticação** | Login, logout e resolução de usuário |
+    | **1 - Usuários** | Perfis, roles, permissões e overrides |
+    | **2 - Portal** | Dashboard e aplicações visíveis no portal |
+    | **3 - Ações PNGI** | Ações, prazos, anotações e destaques |
+    | **4 - Carga Org/Lot** | Carga de organogramas e loteamentos |
+    | **5 - Utilitários** | Health check e logs de frontend |
+paths:
+  /api/accounts/aplicacoes/:
+    get:
+      operationId: accounts_aplicacoes_list
+      description: |-
+        Retorna as aplicações disponíveis ao usuário autenticado no contexto pós-login.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** requer autenticação (`IsAuthenticated`).
+
+        **Escopo de visibilidade:**
+        - `PORTAL_ADMIN` ou `superuser`: visualiza todas as aplicações sem restrição.
+        - usuário comum: visualiza apenas as aplicações nas quais possui `UserRole`, com filtro adicional para apps não bloqueadas e prontas para produção.
+      summary: Listar aplicações visíveis ao usuário
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Aplicacao'
+              examples:
+                ListaDeAplicaçõesDisponíveis:
+                  value:
+                  - - idaplicacao: 1
+                      codigointerno: PORTAL
+                      nomeaplicacao: Portal GPP
+                    - idaplicacao: 3
+                      codigointerno: ACOES_PNGI
+                      nomeaplicacao: Ações PNGI
+                  summary: Resposta 200 — aplicações visíveis ao usuário autenticado
+          description: Lista de aplicações visíveis ao usuário retornada com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoListBadRequestError'
+              examples:
+                ErroGenérico:
+                  value:
+                    detail: Requisição inválida.
+                    code: bad_request
+                  summary: Erro 400 — requisição inválida
+          description: Erro genérico de requisição.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoUnauthorizedErrorList'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoForbiddenErrorList'
+              examples:
+                SemAcesso_àAplicação:
+                  value:
+                    detail: Usuário sem acesso  à aplicação.
+                    code: permission_denied
+                  summary: Erro 403 — usuário sem acesso permitido
+          description: Proibido — usuário autenticado, mas sem acesso ao recurso solicitado.
+  /api/accounts/aplicacoes/{idaplicacao}/:
+    get:
+      operationId: accounts_aplicacoes_retrieve
+      description: |-
+        Retorna os dados de uma aplicação específica visível ao usuário autenticado.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** requer autenticação (`IsAuthenticated`).
+
+        **Escopo de visibilidade:**
+        - `PORTAL_ADMIN` ou `superuser`: pode consultar qualquer aplicação.
+        - usuário comum: pode consultar apenas aplicações nas quais possui `UserRole`.
+      summary: Detalhar aplicação visível ao usuário
+      parameters:
+      - in: path
+        name: idaplicacao
+        schema:
+          type: integer
+        description: ID da aplicação a ser consultada.
+        required: true
+        examples:
+          Aplicação3:
+            value: 3
+            summary: Aplicação 3
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aplicacao'
+              examples:
+                AplicaçãoEncontrada:
+                  value:
+                    idaplicacao: 3
+                    codigointerno: ACOES_PNGI
+                    nomeaplicacao: Ações PNGI
+                  summary: Resposta 200 — aplicação visível ao usuário
+          description: Aplicação retornada com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoBadRequestErrorRetrieve'
+              examples:
+                ErroGenérico:
+                  value:
+                    detail: Requisição inválida.
+                    code: bad_request
+                  summary: Erro 400 — requisição inválida
+          description: Erro genérico de requisição.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoUnauthorizedErrorRetrieve'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoForbiddenErrorRetrieve'
+              examples:
+                SemAcesso_àAplicação:
+                  value:
+                    detail: Usuário sem acesso  à aplicação.
+                    code: permission_denied
+                  summary: Erro 403 — usuário sem acesso  à aplicação
+          description: Proibido — usuário autenticado, mas sem acesso  à aplicação
+            solicitada.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoNotFoundErrorRetrieve'
+              examples:
+                AplicaçãoNãoEncontrada:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — id inexistente ou fora do queryset visível
+          description: Aplicação não encontrada para o ID informado ou fora do escopo
+            visível.
+  /api/accounts/auth/aplicacoes/:
+    get:
+      operationId: accounts_auth_aplicacoes_list
+      description: |-
+        Retorna a lista de aplicações públicas disponíveis para seleção na tela de login.
+
+        **Acesso:** endpoint público (`AllowAny`).
+        **Autenticação:** não requer autenticação.
+        **Sessão:** não usa cookie de sessão.
+
+        **Uso principal:** popular o seletor de aplicações (`app_context`) no frontend antes do login.
+
+        **Filtro aplicado:** retorna apenas aplicações ativas e visíveis, ou seja, não bloqueadas e prontas para produção.
+      summary: Listar aplicações públicas
+      tags:
+      - 5 - Utilitários
+      security:
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AplicacaoPublica'
+              examples:
+                ListaDeAplicaçõesPúblicas:
+                  value:
+                  - - idaplicacao: 1
+                      codigointerno: PORTAL
+                      nomeaplicacao: Portal GPP
+                    - idaplicacao: 2
+                      codigointerno: SIGEF
+                      nomeaplicacao: SIGEF
+                  summary: Resposta 200 — aplicações disponíveis no login
+          description: Lista de aplicações públicas retornada com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoPublicaListBadRequestError'
+              examples:
+                ErroGenérico:
+                  value:
+                    detail: Requisição inválida.
+                    code: bad_request
+                  summary: Erro 400 — requisição inválida
+          description: Erro genérico de requisição.
+  /api/accounts/auth/aplicacoes/{codigointerno}/:
+    get:
+      operationId: accounts_auth_aplicacoes_retrieve
+      description: |-
+        Retorna os dados de uma aplicação pública específica pelo seu `codigointerno`.
+
+        **Acesso:** endpoint público (`AllowAny`).
+        **Autenticação:** não requer autenticação.
+        **Sessão:** não usa cookie de sessão.
+
+        **Uso principal:** consulta de uma aplicação exibida no seletor da tela de login.
+
+        **Filtro aplicado:** somente aplicações ativas e visíveis são expostas por este endpoint.
+      summary: Detalhar aplicação pública
+      parameters:
+      - in: path
+        name: codigointerno
+        schema:
+          type: string
+        description: 'Código interno da aplicação pública (ex: `PORTAL`, `SIGEF`).'
+        required: true
+        examples:
+          AplicaçãoPORTAL:
+            value: PORTAL
+            summary: Aplicação PORTAL
+      tags:
+      - 5 - Utilitários
+      security:
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoPublica'
+              examples:
+                AplicaçãoPúblicaEncontrada:
+                  value:
+                    idaplicacao: 1
+                    codigointerno: PORTAL
+                    nomeaplicacao: Portal GPP
+                  summary: Resposta 200 — aplicação encontrada
+          description: Aplicação pública retornada com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoPublicaRetrieveBadRequestError'
+              examples:
+                ErroGenérico:
+                  value:
+                    detail: Requisição inválida.
+                    code: bad_request
+                  summary: Erro 400 — requisição inválida
+          description: Erro genérico de requisição.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoPublicaNotFoundError'
+              examples:
+                AplicaçãoNãoEncontrada:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — codigointerno inexistente
+          description: Aplicação pública não encontrada.
+  /api/accounts/auth/resolve-user/:
+    post:
+      operationId: accounts_auth_resolve_user_create
+      description: |-
+        Recebe um identificador (email ou username) e retorna o username canônico. Usado pelo frontend antes do login para normalizar o campo digitado pelo usuário.
+
+        **Anti-enumeração (R-02):** o `404` é retornado tanto para identificadores inexistentes quanto para contas desativadas — sem distinguir os dois casos — para evitar que um atacante confirme a existência de um e-mail no sistema.
+
+        Este endpoint é público (`AllowAny`). O frontend **não** precisa enviar cookie nem `withCredentials: true` nesta chamada.
+      summary: Resolve username a partir de email ou username
+      tags:
+      - 0 - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifier:
+                  type: string
+                  example: joao@gov.br
+              required:
+              - identifier
+            examples:
+              Request—PorE-mail:
+                value:
+                  identifier: joao@gov.br
+                summary: Request — por e-mail
+              Request—PorUsername:
+                value:
+                  identifier: joao.silva
+                summary: Request — por username
+      security:
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveUserSuccessResponse'
+              examples:
+                200—UsernameResolvido:
+                  value:
+                    username: joao.silva
+                  summary: 200 — Username resolvido
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveUserBadRequestResponse'
+              examples:
+                400—IdentificadorVazio:
+                  value:
+                    detail: Identificador não informado.
+                    code: invalid_request
+                  summary: 400 — Identificador vazio
+                400—IdentificadorMuitoLongo:
+                  value:
+                    detail: Identificador inválido.
+                    code: invalid_request
+                  summary: 400 — Identificador muito longo
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveUserNotFoundResponse'
+              examples:
+                404—NãoEncontrado:
+                  value:
+                    detail: Usuário não encontrado.
+                    code: user_not_found
+                  summary: 404 — Não encontrado
+          description: ''
+  /api/accounts/authz/version/:
+    get:
+      operationId: accounts_authz_version_retrieve
+      description: |-
+        Retorna o número de versão de autorização do usuário autenticado. Usado **exclusivamente** pelo frontend para invalidação de cache — não representa permissões reais e não deve ser usado em decisões de autorização.
+
+        A versão começa em `0` quando o usuário ainda não possui um `UserAuthzState` (nenhuma mudança de permissão ocorreu desde a criação da conta). O valor é incrementado automaticamente a cada sync de permissões.
+
+        Quando o valor de `authz_version` mudar desde o último check, o frontend deve refazer `GET /me/permissions/`, atualizar o JSON de navegação e invalidar caches locais (React Query / Zustand).
+      summary: Versão de autorização do usuário autenticado
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthzVersionResponse'
+              examples:
+                VersãoInicial—SemEstadoDeAutorização:
+                  value:
+                    authz_version: 0
+                  summary: Usuário sem UserAuthzState registrado (versão lazy = 0)
+                VersãoIncrementada—PermissõesJáSincronizadas:
+                  value:
+                    authz_version: 42
+                  summary: Usuário com múltiplos ciclos de sync de permissões
+          description: ''
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+  /api/accounts/login/:
+    post:
+      operationId: accounts_login_create
+      description: |-
+        Autentica o usuário e cria uma sessão por aplicação `gpp_session_<app_context>` (ex: `gpp_session_PORTAL`). Requer `username`, `password` e `app_context`.
+
+        **Autenticação via cookie HttpOnly:** após o login bem-sucedido, o servidor retorna o header `Set-Cookie: gpp_session_<APP>=<session_key>; HttpOnly; SameSite=Lax`. O frontend **deve** usar `withCredentials: true` (axios) ou `credentials: 'include'` (fetch) em todas as requisições subsequentes para que o browser envie o cookie automaticamente.
+
+        O header `X-CSRFToken` é rotacionado via `rotate_token()` a cada login — o frontend deve reler o cookie `csrftoken` e incluir o novo valor no header `X-CSRFToken` nas próximas requisições mutantes (POST/PUT/PATCH/DELETE).
+      summary: Login via sessão
+      tags:
+      - 0 - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: joao.silva
+                password:
+                  type: string
+                  example: senha123
+                app_context:
+                  type: string
+                  example: PORTAL
+              required:
+              - username
+              - password
+              - app_context
+            examples:
+              Request—LoginNoPORTAL:
+                value:
+                  username: joao.silva
+                  password: senha123
+                  app_context: PORTAL
+                summary: Request — login no PORTAL
+      security:
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccessResponse'
+              examples:
+                200—LoginRealizado:
+                  value:
+                    detail: Login realizado com sucesso
+                  summary: 200 — Login realizado
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginBadRequestResponse'
+              examples:
+                400—CamposAusentes:
+                  value:
+                    detail: Credenciais ou app_context não informados.
+                    code: invalid_request
+                  summary: 400 — Campos ausentes
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginUnauthorizedResponse'
+              examples:
+                401—CredenciaisInválidas:
+                  value:
+                    detail: Credenciais inválidas.
+                    code: invalid_credentials
+                  summary: 401 — Credenciais inválidas
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginForbiddenResponse'
+              examples:
+                403—AplicaçãoInválida:
+                  value:
+                    detail: Aplicação inválida ou bloqueada.
+                    code: invalid_app
+                  summary: 403 — Aplicação inválida
+                403—SemRoleNaAplicação:
+                  value:
+                    detail: Usuário sem acesso  à aplicação informada.
+                    code: no_role
+                  summary: 403 — Sem role na aplicação
+          description: ''
+  /api/accounts/logout/:
+    post:
+      operationId: accounts_logout_session
+      description: |-
+        Encerra a sessão ativa e revoga o registro em AccountsSession.
+
+        Requer que o frontend envie o cookie de sessão (`gpp_session_<APP>`) via `withCredentials: true` (axios) ou `credentials: 'include'` (fetch). Após o logout, o cookie deve ser removido pelo frontend.
+      summary: Logout da sessão atual
+      tags:
+      - 0 - Autenticação
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccessResponse'
+              examples:
+                200—LogoutRealizado:
+                  value:
+                    detail: Logout realizado
+                  summary: 200 — Logout realizado
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutUnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutForbiddenResponse'
+              examples:
+                403—NãoAutenticado(sessãoExpiradaOuCookieAusente):
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                  summary: 403 — Não autenticado (sessão expirada ou cookie ausente)
+          description: ''
+  /api/accounts/logout/{app_slug}/:
+    post:
+      operationId: accounts_logout_app
+      description: |-
+        Revoga a sessão da app informada via `app_slug` e apaga o cookie `gpp_session_<APP>` correspondente.
+
+        Este endpoint **não exige autenticação** — a identificação da sessão é feita diretamente pelo cookie `gpp_session_<APP>` presente na requisição. O frontend deve enviar `credentials: 'include'` para que o browser inclua o cookie automaticamente.
+
+        Se o cookie não estiver presente, o endpoint retorna `200` com mensagem indicando que não havia sessão ativa — não retorna erro.
+      summary: Logout de uma aplicação específica
+      parameters:
+      - in: path
+        name: app_slug
+        schema:
+          type: string
+        description: 'Slug (código interno) da aplicação a deslogar (ex: `portal`,
+          `sigef`).'
+        required: true
+      tags:
+      - 0 - Autenticação
+      security:
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          description: Logout realizado ou sessão já inexistente
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutAppBadRequestResponse'
+              examples:
+                400—AppInválida:
+                  value: App inválida
+                  summary: 400 — App inválida
+          description: ''
+  /api/accounts/me/:
+    get:
+      operationId: accounts_me_retrieve
+      description: |-
+        Retorna os dados do usuário autenticado na sessão atual: profile, roles e apps com acesso.
+
+        A autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.
+
+        Este endpoint não aceita tokens JWT. A sessão é vinculada ao contexto de aplicação (`app_context`) definido no momento do login.
+      summary: Dados do usuário autenticado
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+              examples:
+                Resposta200—UsuárioAutenticado:
+                  value:
+                    id: 42
+                    username: joao.silva
+                    email: joao.silva@orgao.gov.br
+                    name: João da Silva
+                    is_portal_admin: false
+                    orgao: Secretaria de Planejamento
+                    status_usuario_id: 1
+                    roles:
+                    - role: GESTOR
+                      aplicacao: PNGI
+                  summary: Dados completos do usuário autenticado
+                  description: Exemplo real de retorno para um usuário ativo com role
+                    no Portal.
+          description: ''
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+  /api/accounts/me/permissions/:
+    get:
+      operationId: accounts_me_permissions_retrieve
+      description: |-
+        Retorna a role e as permissões do usuário autenticado na aplicação da sessão atual (`app_context`).
+
+        A autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.
+
+        O `app_context` é resolvido pelo `AppContextMiddleware` a partir do cookie de sessão e da tabela `AccountsSession`. O resultado é gravado diretamente em `request.app_context` — este endpoint depende obrigatoriamente desse middleware estar ativo na requisição.
+      summary: Permissões do usuário na app atual
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MePermission'
+              examples:
+                Resposta200—RoleEPermissões:
+                  value:
+                    role: GESTOR
+                    granted:
+                    - programas.view
+                    - usuarios.manage
+                  summary: Usuário autenticado com role GESTOR na app atual
+          description: ''
+        '400':
+          description: Sem app_context na sessão.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '404':
+          description: App não encontrada ou bloqueada, ou usuário sem role na aplicação.
+  /api/accounts/permission-overrides/:
+    get:
+      operationId: accounts_permission_overrides_list
+      description: |-
+        Retorna a lista de overrides de permissão (`UserPermissionOverride`).
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** cada override representa uma alteração explícita nas permissões efetivas de um usuário. As mutações neste recurso disparam `sync_user_permissions(user)`, atualizando imediatamente o conjunto efetivo de permissões do usuário.
+      summary: Listar overrides de permissão
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserPermissionOverrideList'
+              examples:
+                ListaDeOverrides:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?page=4
+                    previous: http://api.example.org/accounts/?page=2
+                    results:
+                    - - id: 1
+                        user: 42
+                        permission: 15
+                        mode: grant
+                      - id: 2
+                        user: 42
+                        permission: 18
+                        mode: revoke
+                  summary: Resposta 200 — listagem bem-sucedida
+          description: Lista de overrides retornada com sucesso.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedError'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorList'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+    post:
+      operationId: accounts_permission_overrides_create
+      description: |-
+        Cria um novo `UserPermissionOverride` para conceder ou revogar explicitamente uma permissão de um usuário.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** a criação do override altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a persistência.
+      summary: Criar override de permissão
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                OverrideCriado:
+                  value:
+                    id: 3
+                    user: 42
+                    permission: 21
+                    mode: grant
+                  summary: Resposta 201 — criação bem-sucedida
+          description: Override criado com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                PermissãoInválida:
+                  value:
+                    permission:
+                    - Selecione uma opção válida.
+                  summary: Erro 400 — permissão inexistente ou inválida
+                ConflitoDeOverride:
+                  value:
+                    detail: Já existe um override para este usuário e permissão.
+                    code: conflict
+                  summary: Erro 400 — override já existente para usuário e permissão
+          description: Dados inválidos ou conflito de validação.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedErrorCreate'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorCreate'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+  /api/accounts/permission-overrides/{id}/:
+    get:
+      operationId: accounts_permission_overrides_retrieve
+      description: |-
+        Retorna os dados de um override de permissão específico.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** overrides afetam as permissões efetivas do usuário. As mutações neste recurso disparam `sync_user_permissions(user)` para recalcular imediatamente o estado efetivo.
+      summary: Detalhar override de permissão
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Permission Override.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                OverrideEncontrado:
+                  value:
+                    id: 1
+                    user: 42
+                    permission: 15
+                    mode: grant
+                  summary: Resposta 200 — detalhe do override
+          description: Override retornado com sucesso.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedErrorRetrieve'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorRetrieve'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideNotFoundErrorRetrieve'
+              examples:
+                OverrideNãoEncontrado:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — id inexistente
+          description: Override não encontrado para o ID informado.
+    put:
+      operationId: accounts_permission_overrides_update
+      description: |-
+        Atualiza completamente um `UserPermissionOverride` existente.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** a atualização altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a mutação.
+      summary: Atualizar override de permissão
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Permission Override.
+        required: true
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPermissionOverride'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                OverrideAtualizado:
+                  value:
+                    id: 3
+                    user: 42
+                    permission: 21
+                    mode: revoke
+                  summary: Resposta 200 — atualização completa bem-sucedida
+          description: Override atualizado com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                PermissãoInválida:
+                  value:
+                    permission:
+                    - Selecione uma opção válida.
+                  summary: Erro 400 — permissão inexistente ou inválida
+                ConflitoDeOverride:
+                  value:
+                    detail: Já existe um override para este usuário e permissão.
+                    code: conflict
+                  summary: Erro 400 — combinação inválida ou já existente
+          description: Dados inválidos ou conflito de validação.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedErrorUpdate'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorUpdate'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideNotFoundErrorUpdate'
+              examples:
+                OverrideNãoEncontrado:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — id inexistente
+          description: Override não encontrado para o ID informado.
+    patch:
+      operationId: accounts_permission_overrides_partial_update
+      description: |-
+        Atualiza parcialmente um `UserPermissionOverride` existente.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** a alteração parcial afeta as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a mutação.
+      summary: Atualizar parcialmente override de permissão
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Permission Override.
+        required: true
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPermissionOverride'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPermissionOverride'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPermissionOverride'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                OverrideParcialmenteAtualizado:
+                  value:
+                    id: 3
+                    user: 42
+                    permission: 21
+                    mode: revoke
+                  summary: Resposta 200 — patch bem-sucedido
+          description: Override atualizado parcialmente com sucesso.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverride'
+              examples:
+                PermissãoInválida:
+                  value:
+                    permission:
+                    - Selecione uma opção válida.
+                  summary: Erro 400 — permissão inexistente ou inválida
+                ConflitoDeOverride:
+                  value:
+                    detail: Já existe um override para este usuário e permissão.
+                    code: conflict
+                  summary: Erro 400 — combinação inválida ou já existente
+          description: Dados inválidos ou conflito de validação.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedErrorPartialUpdate'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorPartialUpdate'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideNotFoundErrorPartialUpdate'
+              examples:
+                OverrideNãoEncontrado:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — id inexistente
+          description: Override não encontrado para o ID informado.
+    delete:
+      operationId: accounts_permission_overrides_destroy
+      description: |-
+        Remove um `UserPermissionOverride` existente.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Impacto funcional:** a remoção do override afeta as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a exclusão.
+      summary: Remover override de permissão
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Permission Override.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: Override removido com sucesso. Sem conteúdo no corpo da resposta.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideUnauthorizedErrorDestroy'
+              examples:
+                NãoAutenticado:
+                  value:
+                    detail: As credenciais de autenticação não foram fornecidas.
+                    code: not_authenticated
+                  summary: Erro 401 — cookie de sessão ausente ou inválido
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideForbiddenErrorDestroy'
+              examples:
+                SemPermissão:
+                  value:
+                    detail: Você não tem permissão para executar essa ação.
+                    code: permission_denied
+                  summary: Erro 403 — acesso restrito a PORTAL_ADMIN
+          description: Proibido — usuário autenticado, mas sem permissão administrativa.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionOverrideNotFoundErrorDestroy'
+              examples:
+                OverrideNãoEncontrado:
+                  value:
+                    detail: Não encontrado.
+                    code: not_found
+                  summary: Erro 404 — id inexistente
+          description: Override não encontrado para o ID informado.
+  /api/accounts/profiles/:
+    get:
+      operationId: accounts_profiles_list
+      description: APIs de UserProfile.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserProfileList'
+          description: ''
+  /api/accounts/profiles/{user_id}/:
+    get:
+      operationId: accounts_profiles_retrieve
+      description: APIs de UserProfile.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        description: Um valor único que identifica este User Profile.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    patch:
+      operationId: accounts_profiles_partial_update
+      description: |-
+        Atualiza parcialmente um `UserProfile` existente.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Parâmetro de rota:** `user_id` identifica o usuário dono do perfil.
+
+        **Permissões e cenários de `403 Forbidden`:**
+        - sem permissão para editar o perfil alvo;
+        - tentativa de alterar `classificacao_usuario` sem privilégio administrativo;
+        - tentativa de alterar `status_usuario` sem privilégio administrativo.
+
+        **Observação:** esta operação é parcial (`PATCH`), portanto apenas os campos enviados no payload serão alterados.
+      summary: Atualizar parcialmente perfil de usuário
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        description: ID do usuário dono do perfil a ser consultado/atualizado.
+        required: true
+        examples:
+          ExemploDeUserId:
+            value: 42
+            summary: Exemplo de user_id
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                PerfilAtualizado:
+                  value:
+                    user: 42
+                    telefone: (27) 99999-0000
+                    classificacao_usuario: 1
+                    status_usuario: 1
+                    tipo_usuario: 2
+                    orgao: 10
+                  summary: Resposta 200 — atualização parcial bem-sucedida
+          description: Perfil atualizado com sucesso.
+        '400':
+          description: Dados inválidos no payload.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          description: Proibido — usuário autenticado, mas sem permissão para editar
+            o perfil ou para alterar campos restritos.
+        '404':
+          description: Perfil não encontrado para o `user_id` informado.
+  /api/accounts/roles/:
+    get:
+      operationId: accounts_roles_list
+      description: |-
+        GET /api/accounts/roles/
+        GET /api/accounts/roles/{id}/
+        Acesso exclusivo a PORTAL_ADMIN.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoleList'
+          description: ''
+  /api/accounts/roles/{id}/:
+    get:
+      operationId: accounts_roles_retrieve
+      description: |-
+        GET /api/accounts/roles/
+        GET /api/accounts/roles/{id}/
+        Acesso exclusivo a PORTAL_ADMIN.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este Role.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: ''
+  /api/accounts/user-roles/:
+    get:
+      operationId: accounts_user_roles_list
+      description: Gerencia UserRoles. Apenas PORTAL_ADMIN.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserRoleList'
+          description: ''
+    post:
+      operationId: accounts_user_roles_create
+      description: |-
+        Cria um vínculo `UserRole` entre usuário, role e aplicação.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Efeito colateral:** após a criação do vínculo, o endpoint executa `sync_user_permissions(user)` para sincronizar as permissões efetivas do usuário de forma atômica.
+      summary: Vincular role a usuário
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+              examples:
+                UserRoleCriado:
+                  value:
+                    id: 15
+                    user: 42
+                    aplicacao: 3
+                    role: 7
+                  summary: Resposta 201 — vínculo criado com sucesso
+          description: Vínculo de role criado com sucesso.
+        '400':
+          description: Dados inválidos ou regra de validação violada.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          description: Proibido — usuário autenticado, mas sem perfil PORTAL_ADMIN.
+  /api/accounts/user-roles/{id}/:
+    get:
+      operationId: accounts_user_roles_retrieve
+      description: Gerencia UserRoles. Apenas PORTAL_ADMIN.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Role.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+          description: ''
+    delete:
+      operationId: accounts_user_roles_destroy
+      description: |-
+        Remove um vínculo `UserRole` existente.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+        **Efeito colateral:** após a remoção do vínculo, o endpoint executa `sync_user_permissions(user)` para recalcular as permissões efetivas do usuário com base nas roles remanescentes.
+      summary: Remover vínculo de role do usuário
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este User Role.
+        required: true
+      tags:
+      - 1 - Usuários
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: Vínculo removido com sucesso. Sem conteúdo no corpo da resposta.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          description: Proibido — usuário autenticado, mas sem perfil PORTAL_ADMIN.
+        '404':
+          description: Vínculo `UserRole` não encontrado para o ID informado.
+  /api/accounts/users/:
+    post:
+      operationId: accounts_users_create
+      description: |-
+        Cria atomicamente um `auth.User` e seu `UserProfile` vinculado.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:**
+        - `401 Unauthorized` — sessão ausente ou expirada (não autenticado).
+        - `403 Forbidden` — autenticado, mas sem a permissão `CanCreateUser` ou fora do escopo de aplicações que o operador gerencia.
+
+        **Campo `password`:** write-only. Nunca é retornado na resposta.
+
+        **Atomicidade:** criação do `User` e do `UserProfile` ocorre em uma única transação — em caso de falha, nenhum registro parcial é persistido.
+      summary: Criar usuário (sem role)
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+              examples:
+                UsuárioCriado:
+                  value:
+                    username: joao.silva
+                    email: joao.silva@gov.br
+                    first_name: João
+                    last_name: Silva
+                    profile:
+                      cpf: 000.000.000-00
+                      telefone: (27) 99999-0000
+                  summary: Resposta 201 — criação bem-sucedida
+          description: Usuário criado com sucesso. O campo `password` não é retornado.
+        '400':
+          description: Dados de entrada inválidos.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          description: Proibido — autenticado, mas sem permissão `CanCreateUser` ou
+            fora do escopo de aplicações gerenciadas pelo operador.
+  /api/accounts/users/create-with-role/:
+    post:
+      operationId: accounts_users_create_with_role_create
+      description: |-
+        Cria atomicamente `auth.User` + `UserProfile` + `UserRole` e dispara sincronização de permissões via `sync_user_permissions`.
+
+        **Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+        **Permissões:**
+        - `401 Unauthorized` — sessão ausente ou expirada (não autenticado).
+        - `403 Forbidden (papel insuficiente)` — autenticado, mas não é `PORTAL_ADMIN` nem `superuser`.
+        - `403 Forbidden (escopo)` — é `PORTAL_ADMIN`, mas a `aplicacao` de destino está fora das aplicações que o operador gerencia.
+
+        **Atomicidade:** `User`, `UserProfile`, `UserRole` e o sync de permissões ocorrem em uma única transação — em caso de falha, nenhum registro parcial é persistido.
+
+        **Resposta:** retorna um `dict` customizado com os dados do usuário criado, sua role e a aplicação vinculada.
+      summary: Criar usuário com role (fluxo completo)
+      tags:
+      - 1 - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateWithRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateWithRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateWithRole'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          description: Usuário criado com role e permissões sincronizadas.
+        '400':
+          description: Dados de entrada inválidos.
+        '401':
+          description: Não autenticado — sessão ausente ou expirada.
+        '403':
+          description: Proibido — papel insuficiente ou operador fora do escopo da
+            aplicação de destino.
+  /api/acoes-pngi/acoes/:
+    get:
+      operationId: acoes_pngi_acoes_list
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAcoesList'
+          description: ''
+    post:
+      operationId: acoes_pngi_acoes_create
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Acoes'
+          description: ''
+  /api/acoes-pngi/acoes/{acao_pk}/anotacoes/:
+    get:
+      operationId: acoes_pngi_acoes_anotacoes_list
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAcaoAnotacaoAlinhamentoList'
+          description: ''
+    post:
+      operationId: acoes_pngi_acoes_anotacoes_create
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          description: ''
+  /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/:
+    get:
+      operationId: acoes_pngi_acoes_anotacoes_retrieve
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoanotacaoalinhamento
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao anotacao alinhamento.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          description: ''
+    put:
+      operationId: acoes_pngi_acoes_anotacoes_update
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoanotacaoalinhamento
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao anotacao alinhamento.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          description: ''
+    patch:
+      operationId: acoes_pngi_acoes_anotacoes_partial_update
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoanotacaoalinhamento
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao anotacao alinhamento.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoAnotacaoAlinhamento'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoAnotacaoAlinhamento'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoAnotacaoAlinhamento'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+          description: ''
+    delete:
+      operationId: acoes_pngi_acoes_anotacoes_destroy
+      description: |-
+        Anotações de alinhamento de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoanotacaoalinhamento
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao anotacao alinhamento.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/acoes-pngi/acoes/{acao_pk}/destaques/:
+    get:
+      operationId: acoes_pngi_acoes_destaques_list
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAcaoDestaqueList'
+          description: ''
+    post:
+      operationId: acoes_pngi_acoes_destaques_create
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoDestaque'
+          description: ''
+  /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/:
+    get:
+      operationId: acoes_pngi_acoes_destaques_retrieve
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaodestaque
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao destaque.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoDestaque'
+          description: ''
+    put:
+      operationId: acoes_pngi_acoes_destaques_update
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaodestaque
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao destaque.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoDestaque'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoDestaque'
+          description: ''
+    patch:
+      operationId: acoes_pngi_acoes_destaques_partial_update
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaodestaque
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao destaque.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoDestaque'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoDestaque'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoDestaque'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoDestaque'
+          description: ''
+    delete:
+      operationId: acoes_pngi_acoes_destaques_destroy
+      description: |-
+        Destaques de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaodestaque
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao destaque.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/acoes-pngi/acoes/{acao_pk}/prazos/:
+    get:
+      operationId: acoes_pngi_acoes_prazos_list
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAcaoPrazoList'
+          description: ''
+    post:
+      operationId: acoes_pngi_acoes_prazos_create
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoPrazo'
+          description: ''
+  /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/:
+    get:
+      operationId: acoes_pngi_acoes_prazos_retrieve
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoprazo
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao prazo.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoPrazo'
+          description: ''
+    put:
+      operationId: acoes_pngi_acoes_prazos_update
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoprazo
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao prazo.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcaoPrazo'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoPrazo'
+          description: ''
+    patch:
+      operationId: acoes_pngi_acoes_prazos_partial_update
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoprazo
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao prazo.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoPrazo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoPrazo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAcaoPrazo'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcaoPrazo'
+          description: ''
+    delete:
+      operationId: acoes_pngi_acoes_prazos_destroy
+      description: |-
+        Prazos de uma Ação PNGI.
+        Filtrado pelo idacao passado na URL.
+      parameters:
+      - in: path
+        name: acao_pk
+        schema:
+          type: integer
+        description: ID (idacao) da Ação PNGI pai
+        required: true
+      - in: path
+        name: idacaoprazo
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acao prazo.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/acoes-pngi/acoes/{idacao}/:
+    get:
+      operationId: acoes_pngi_acoes_retrieve
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      parameters:
+      - in: path
+        name: idacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acoes.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Acoes'
+          description: ''
+    put:
+      operationId: acoes_pngi_acoes_update
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      parameters:
+      - in: path
+        name: idacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acoes.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Acoes'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Acoes'
+          description: ''
+    patch:
+      operationId: acoes_pngi_acoes_partial_update
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      parameters:
+      - in: path
+        name: idacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acoes.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAcoes'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAcoes'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAcoes'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Acoes'
+          description: ''
+    delete:
+      operationId: acoes_pngi_acoes_destroy
+      description: |-
+        Ações PNGI — entidade principal.
+
+        Acoes são independentes de orgão (iniciativas do programa PNGI).
+        NÃO herda SecureQuerysetMixin.
+        Controle de acesso exclusivamente por roles via _load_role_matrix().
+        AuditableMixin preenche created_by_id/name e updated_by_id/name.
+      parameters:
+      - in: path
+        name: idacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este acoes.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/acoes-pngi/eixos/:
+    get:
+      operationId: acoes_pngi_eixos_list
+      description: |-
+        Eixos temáticos do programa PNGI.
+        Somente leitura para todos os usuários autenticados.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEixoList'
+          description: ''
+  /api/acoes-pngi/eixos/{ideixo}/:
+    get:
+      operationId: acoes_pngi_eixos_retrieve
+      description: |-
+        Eixos temáticos do programa PNGI.
+        Somente leitura para todos os usuários autenticados.
+      parameters:
+      - in: path
+        name: ideixo
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este eixo.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Eixo'
+          description: ''
+  /api/acoes-pngi/situacoes/:
+    get:
+      operationId: acoes_pngi_situacoes_list
+      description: |-
+        Situações possíveis de uma Ação PNGI.
+        Somente leitura para todos os usuários autenticados.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSituacaoAcaoList'
+          description: ''
+  /api/acoes-pngi/situacoes/{idsituacaoacao}/:
+    get:
+      operationId: acoes_pngi_situacoes_retrieve
+      description: |-
+        Situações possíveis de uma Ação PNGI.
+        Somente leitura para todos os usuários autenticados.
+      parameters:
+      - in: path
+        name: idsituacaoacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este situacao acao.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SituacaoAcao'
+          description: ''
+  /api/acoes-pngi/vigencias/:
+    get:
+      operationId: acoes_pngi_vigencias_list
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVigenciaPNGIList'
+          description: ''
+    post:
+      operationId: acoes_pngi_vigencias_create
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VigenciaPNGI'
+          description: ''
+  /api/acoes-pngi/vigencias/{idvigenciapngi}/:
+    get:
+      operationId: acoes_pngi_vigencias_retrieve
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      parameters:
+      - in: path
+        name: idvigenciapngi
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este vigencia pngi.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VigenciaPNGI'
+          description: ''
+    put:
+      operationId: acoes_pngi_vigencias_update
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      parameters:
+      - in: path
+        name: idvigenciapngi
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este vigencia pngi.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VigenciaPNGI'
+        required: true
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VigenciaPNGI'
+          description: ''
+    patch:
+      operationId: acoes_pngi_vigencias_partial_update
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      parameters:
+      - in: path
+        name: idvigenciapngi
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este vigencia pngi.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVigenciaPNGI'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVigenciaPNGI'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVigenciaPNGI'
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VigenciaPNGI'
+          description: ''
+    delete:
+      operationId: acoes_pngi_vigencias_destroy
+      description: |-
+        Vigências do programa PNGI.
+
+        Escrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.
+        OPERADOR_ACAO e CONSULTOR_PNGI somente leitura.
+        Deleção exclusiva do GESTOR_PNGI.
+
+        Usa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()
+        para garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.
+      parameters:
+      - in: path
+        name: idvigenciapngi
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este vigencia pngi.
+        required: true
+      tags:
+      - 3 - Ações PNGI
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/core/frontendlog/:
+    post:
+      operationId: core_frontendlog_create
+      description: Recebe eventos de erro/log gerados pelo frontend e os registra
+        no logger de segurança do servidor. Requer autenticação.
+      summary: Log de erros do frontend
+      tags:
+      - 5 - Utilitários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level:
+                  type: string
+                  example: error
+                  enum:
+                  - debug
+                  - info
+                  - warn
+                  - error
+                message:
+                  type: string
+                  example: 'TypeError: Cannot read properties of null'
+                context:
+                  type: object
+                  example:
+                    page: /dashboard
+                    user_agent: Mozilla/5.0
+              required:
+              - level
+              - message
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          description: '{"status": "ok"}'
+        '401':
+          description: Não autenticado
+  /api/portal/aplicacoes/:
+    get:
+      operationId: portal_aplicacoes_list
+      description: |-
+        GET /api/portal/aplicacoes/         → lista apps visíveis no portal
+        GET /api/portal/aplicacoes/{id}/    → detalhe de uma app
+        Requer autenticação.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a serem retornados por página.
+        schema:
+          type: integer
+      tags:
+      - 2 - Portal
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAplicacaoPortalList'
+          description: ''
+  /api/portal/aplicacoes/{idaplicacao}/:
+    get:
+      operationId: portal_aplicacoes_retrieve
+      description: |-
+        GET /api/portal/aplicacoes/         → lista apps visíveis no portal
+        GET /api/portal/aplicacoes/{id}/    → detalhe de uma app
+        Requer autenticação.
+      parameters:
+      - in: path
+        name: idaplicacao
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este Aplicação.
+        required: true
+      tags:
+      - 2 - Portal
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AplicacaoPortal'
+          description: ''
+  /api/portal/dashboard/:
+    get:
+      operationId: portal_dashboard_retrieve
+      description: Retorna todas as aplicações que o usuário autenticado tem permissão
+        para acessar, retorna também os perfis do usuário para cada aplicação que
+        está cadastrada.
+      summary: Dashboard do Portal.
+      tags:
+      - 2 - Portal
+      security:
+      - gppSessionAuth: []
+      - portalAuth: []
+      - cargaOrgLotAuth: []
+      - acoesPngiAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+        '403':
+          description: Usuário não autenticado ou sem permissão
+components:
+  schemas:
+    AcaoAnotacaoAlinhamento:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaoanotacaoalinhamento:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        idtipoanotacaoalinhamento_id:
+          type: integer
+          nullable: true
+        strdescricao:
+          type: string
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - idacao_id
+      - idacaoanotacaoalinhamento
+      - strdescricao
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+    AcaoDestaque:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaodestaque:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        datdatadestaque:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - datdatadestaque
+      - idacao_id
+      - idacaodestaque
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+    AcaoPrazo:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaoprazo:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        isacaoprazoativo:
+          type: boolean
+        strprazo:
+          type: string
+          maxLength: 50
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - idacao_id
+      - idacaoprazo
+      - strprazo
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+    Acoes:
+      type: object
+      description: |-
+        Serializer principal de Acoes.
+
+        FKs declaradas explicitamente como PrimaryKeyRelatedField(source=...) para
+        garantir escrita correta via payload _id.
+
+        O DRF NÃO resolve automaticamente `idvigenciapngi_id` como campo writable
+        quando o atributo ORM se chama `idvigenciapngi` (ForeignKey): ele gera um
+        IntegerField read-only, ignora o valor recebido e salva null → NotNullViolation.
+        A solução é declarar o campo explicitamente com source apontando para o
+        atributo ORM real.
+
+        orgao NÃO aparece aqui — Ações são independentes de orgão.
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacao:
+          type: integer
+          readOnly: true
+        strapelido:
+          type: string
+          maxLength: 50
+        strdescricaoacao:
+          type: string
+          maxLength: 350
+        strdescricaoentrega:
+          type: string
+          maxLength: 100
+        datdataentrega:
+          type: string
+          format: date-time
+          nullable: true
+        idvigenciapngi_id:
+          type: integer
+        idtipoentravealerta_id:
+          type: integer
+          nullable: true
+        idsituacaoacao_id:
+          type: integer
+          nullable: true
+        ideixo_id:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - idacao
+      - idvigenciapngi_id
+      - strapelido
+      - strdescricaoacao
+      - strdescricaoentrega
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+    Aplicacao:
+      type: object
+      description: |-
+        GAP-02 — Serializer autenticado para o model Aplicacao.
+        Expõe os três flags de estado para que o frontend decida visibilidade
+        e habilitação de ações sem requisições adicionais.
+
+        Endpoint: GET /api/accounts/aplicacoes/
+        Acesso: IsAuthenticated (escopo por UserRole ou PORTAL_ADMIN)
+      properties:
+        idaplicacao:
+          type: integer
+          readOnly: true
+        codigointerno:
+          type: string
+          maxLength: 50
+        nomeaplicacao:
+          type: string
+          maxLength: 200
+        base_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        isshowinportal:
+          type: boolean
+        isappbloqueada:
+          type: boolean
+          nullable: true
+          description: Indica se a aplicação está bloqueada para uso. Quando True,
+            nenhum usuário (exceto PORTAL_ADMIN ou SuperUser) pode ter novos vínculos
+            criados nesta aplicação. Uma app pode estar bloqueada por manutenção,
+            auditoria ou incidente independentemente do seu estado de produção.
+        isappproductionready:
+          type: boolean
+          nullable: true
+          description: Indica se a aplicação está homologada e habilitada para uso
+            em ambiente de produção. Somente apps com este flag True e isappbloqueada=False
+            aceitam novos vínculos de usuários. O tratamento de visibilidade no portal
+            é feito no frontend.
+      required:
+      - codigointerno
+      - idaplicacao
+      - nomeaplicacao
+    AplicacaoBadRequestErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoForbiddenErrorList:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoForbiddenErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoListBadRequestError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoNotFoundErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoPortal:
+      type: object
+      properties:
+        idaplicacao:
+          type: integer
+          readOnly: true
+        codigointerno:
+          type: string
+          maxLength: 50
+        nomeaplicacao:
+          type: string
+          maxLength: 200
+        base_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        isshowinportal:
+          type: boolean
+      required:
+      - codigointerno
+      - idaplicacao
+      - nomeaplicacao
+    AplicacaoPublica:
+      type: object
+      description: |-
+        ARCH-01 — Serializer público para o endpoint de autenticação.
+
+        Expõe apenas o mínimo necessário para o seletor de app_context
+        na tela de login. Não vaza flags internos (isappbloqueada,
+        isappproductionready, base_url, isshowinportal) nem PKs internas
+        (idaplicacao).
+
+        Endpoint: GET /api/accounts/auth/aplicacoes/
+        Acesso: AllowAny
+      properties:
+        codigointerno:
+          type: string
+          maxLength: 50
+        nomeaplicacao:
+          type: string
+          maxLength: 200
+      required:
+      - codigointerno
+      - nomeaplicacao
+    AplicacaoPublicaListBadRequestError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoPublicaNotFoundError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoPublicaRetrieveBadRequestError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoUnauthorizedErrorList:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AplicacaoUnauthorizedErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    AuthzVersionResponse:
+      type: object
+      properties:
+        authz_version:
+          type: integer
+          description: Versão atual de autorização do usuário. Começa em 0 se não
+            houver estado registrado.
+      required:
+      - authz_version
+    Dashboard:
+      type: object
+      description: |-
+        Serializador para o endpoint /dashboard/.
+        Agrega aplicações visíveis no portal e roles do usuário.
+      properties:
+        aplicacoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AplicacaoPortal'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoleDashboard'
+      required:
+      - aplicacoes
+      - roles
+    Eixo:
+      type: object
+      properties:
+        ideixo:
+          type: integer
+          readOnly: true
+        strdescricaoeixo:
+          type: string
+          maxLength: 100
+        stralias:
+          type: string
+          maxLength: 5
+        created_by_id:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: ID lógico do usuário que criou o registro (sem FK para auth_user).
+        created_by_name:
+          type: string
+          readOnly: true
+          description: Snapshot do username no momento da criação — imutável.
+        updated_by_id:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: ID lógico do usuário que fez a última alteração (sem FK para
+            auth_user).
+        updated_by_name:
+          type: string
+          readOnly: true
+          description: Snapshot do username no momento da última alteração — imutável.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - ideixo
+      - stralias
+      - strdescricaoeixo
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+    LoginBadRequestResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    LoginForbiddenResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    LoginSuccessResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    LoginUnauthorizedResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    LogoutAppBadRequestResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    LogoutForbiddenResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    LogoutSuccessResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    LogoutUnauthorizedResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    Me:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        is_portal_admin:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        orgao:
+          type: string
+          readOnly: true
+        status_usuario_id:
+          type: string
+          readOnly: true
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoleNested'
+      required:
+      - email
+      - first_name
+      - id
+      - is_portal_admin
+      - last_name
+      - name
+      - orgao
+      - roles
+      - status_usuario_id
+      - username
+    MePermission:
+      type: object
+      description: |-
+        Serializer para GET /api/accounts/me/permissions/
+        Retorna a role do usuário na app e os codenames de permissão concedidos.
+
+        Formato:
+        {
+            "role": "GESTOR",
+            "granted": ["view_programa", "add_programa"]
+        }
+
+        Espera receber o dict:
+        {
+            "role": <instância Role>,
+            "user": <instância User>,
+        }
+
+        FASE-4-PERM (corrige D-02):
+            A leitura é feita de ``user.user_permissions``
+            (``auth_user_user_permissions``), que é a única fonte de verdade
+            em runtime conforme ADR-PERM-01.
+
+        FIX (Issue #22 Falha 3):
+            Lógica anterior filtrava user.user_permissions pelo conjunto
+            group_codenames (permissões do grupo da role). Isso excluía
+            silenciosamente permissões adicionadas via grant override, pois
+            elas não fazem parte do template do grupo da role.
+
+            Nova lógica — preserva escopo por aplicação via group_codenames
+            mas inclui grants extras:
+
+              all_user_perms  = todos os codenames em user.user_permissions
+              group_scope     = codenames do grupo da role (template da app)
+              grant_overrides = codenames de overrides mode='grant' para o user
+                                nesta role (podem estar fora do grupo)
+              revoke_override_codenames = codenames de overrides mode='revoke'
+                                para o user que pertencem ao escopo da app
+                                (group_scope ∪ grant_overrides)
+
+              resultado = (group_scope ∩ all_user_perms)
+                          ∪ (grant_overrides ∩ all_user_perms)
+                          - revoke_override_codenames
+
+            Simplificando: como sync_user_permissions() já aplica a fórmula
+            herdadas | grants - revokes em auth_user_user_permissions,
+            basta ler all_user_perms limitado ao escopo da aplicação:
+
+              escopo_app = group_scope ∪ grant_overrides_da_role
+              resultado  = all_user_perms ∩ escopo_app
+
+            Isso é correto e idempotente pois o sync já garantiu que revokes
+            não estão em user.user_permissions.
+
+        Referências: ADR-PERM-01, PERMISSIONS_ARCHITECTURE.md
+          Fórmula: herdadas |= user_permissions |= grant -= revoke
+      properties:
+        role:
+          type: string
+          readOnly: true
+        granted:
+          type: string
+          readOnly: true
+      required:
+      - granted
+      - role
+    ModeEnum:
+      enum:
+      - grant
+      - revoke
+      type: string
+      description: |-
+        * `grant` - Grant — conceder permissão extra
+        * `revoke` - Revoke — retirar permissão da role
+    PaginatedAcaoAnotacaoAlinhamentoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcaoAnotacaoAlinhamento'
+    PaginatedAcaoDestaqueList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcaoDestaque'
+    PaginatedAcaoPrazoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcaoPrazo'
+    PaginatedAcoesList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Acoes'
+    PaginatedAplicacaoPortalList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AplicacaoPortal'
+    PaginatedEixoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Eixo'
+    PaginatedRoleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+    PaginatedSituacaoAcaoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SituacaoAcao'
+    PaginatedUserPermissionOverrideList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPermissionOverride'
+    PaginatedUserProfileList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+    PaginatedUserRoleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+    PaginatedVigenciaPNGIList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VigenciaPNGI'
+    PatchedAcaoAnotacaoAlinhamento:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaoanotacaoalinhamento:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        idtipoanotacaoalinhamento_id:
+          type: integer
+          nullable: true
+        strdescricao:
+          type: string
+    PatchedAcaoDestaque:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaodestaque:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        datdatadestaque:
+          type: string
+          format: date-time
+    PatchedAcaoPrazo:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacaoprazo:
+          type: integer
+          readOnly: true
+        idacao_id:
+          type: integer
+        isacaoprazoativo:
+          type: boolean
+        strprazo:
+          type: string
+          maxLength: 50
+    PatchedAcoes:
+      type: object
+      description: |-
+        Serializer principal de Acoes.
+
+        FKs declaradas explicitamente como PrimaryKeyRelatedField(source=...) para
+        garantir escrita correta via payload _id.
+
+        O DRF NÃO resolve automaticamente `idvigenciapngi_id` como campo writable
+        quando o atributo ORM se chama `idvigenciapngi` (ForeignKey): ele gera um
+        IntegerField read-only, ignora o valor recebido e salva null → NotNullViolation.
+        A solução é declarar o campo explicitamente com source apontando para o
+        atributo ORM real.
+
+        orgao NÃO aparece aqui — Ações são independentes de orgão.
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idacao:
+          type: integer
+          readOnly: true
+        strapelido:
+          type: string
+          maxLength: 50
+        strdescricaoacao:
+          type: string
+          maxLength: 350
+        strdescricaoentrega:
+          type: string
+          maxLength: 100
+        datdataentrega:
+          type: string
+          format: date-time
+          nullable: true
+        idvigenciapngi_id:
+          type: integer
+        idtipoentravealerta_id:
+          type: integer
+          nullable: true
+        idsituacaoacao_id:
+          type: integer
+          nullable: true
+        ideixo_id:
+          type: integer
+          nullable: true
+    PatchedUserPermissionOverride:
+      type: object
+      description: |-
+        FASE-7 (Issue #20) — Serializer para UserPermissionOverride.
+
+        Resolve o ImportError crítico que impedia o carregamento de views.py
+        e quebrava o URL routing completo do Django (~135 testes afetados).
+
+        Campos expostos:
+          - id              : PK do override (read_only via ModelSerializer)
+          - user            : FK para auth.User (PK inteira)
+          - permission      : FK para auth.Permission (PK inteira)
+          - mode            : 'grant' | 'revoke'
+          - source          : origem do override (ex: 'admin manual') — opcional
+          - reason          : justificativa para auditoria — opcional
+          - created_at      : timestamp de criação (read_only)
+          - updated_at      : timestamp da última atualização (read_only)
+          - created_by      : usuário que criou (read_only — preenchido pela view via AuditableMixin)
+          - updated_by      : último usuário que atualizou (read_only — idem)
+
+        Validação:
+          validate() impede coexistência de override 'grant' e 'revoke' para o
+          mesmo par (user, permission), espelhando o clean() do model em nível DRF
+          para garantir resposta 400 em vez de exceção não tratada.
+
+        FIX (Issue #21):
+          create() e update() sobrescritos para descartar created_by_name e
+          updated_by_name injetados pelo AuditableMixin (campos inexistentes no
+          model UserPermissionOverride) e mapear created_by_id/updated_by_id
+          para as FKs created_by/updated_by do model.
+
+        Referências: ADR-PERM-01, divergência D-04, Issue #18, Issue #20, Issue #21.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          description: Usuário ao qual o override se aplica.
+        permission:
+          type: integer
+          description: Permissão Django (auth.Permission) que está sendo sobrescrita.
+        mode:
+          allOf:
+          - $ref: '#/components/schemas/ModeEnum'
+          description: |-
+            'grant' adiciona a permissão ao usuário independentemente da role. 'revoke' retira a permissão mesmo que a role a conceda.
+
+            * `grant` - Grant — conceder permissão extra
+            * `revoke` - Revoke — retirar permissão da role
+        source:
+          type: string
+          description: 'Origem do override (ex: ''admin manual'', ''integração XPTO'').
+            Opcional.'
+          maxLength: 200
+        reason:
+          type: string
+          description: Justificativa detalhada para o override. Opcional, mas recomendada
+            para auditoria.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Usuário que criou o override (auditoria).
+        updated_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Último usuário a atualizar o override (auditoria).
+    PatchedUserProfile:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        status_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        tipo_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        classificacao_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        orgao:
+          type: string
+          nullable: true
+          maxLength: 100
+        datacriacao:
+          type: string
+          format: date-time
+          readOnly: true
+        data_alteracao:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PatchedVigenciaPNGI:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idvigenciapngi:
+          type: integer
+          readOnly: true
+        strdescricao:
+          type: string
+          maxLength: 200
+        datiniciovigencia:
+          type: string
+          format: date
+        datfinalvigencia:
+          type: string
+          format: date
+          nullable: true
+    ResolveUserBadRequestResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    ResolveUserNotFoundResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    ResolveUserSuccessResponse:
+      type: object
+      properties:
+        username:
+          type: string
+      required:
+      - username
+    Role:
+      type: object
+      description: GAP-03 — Serializer enriquecido de Role.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nomeperfil:
+          type: string
+          maxLength: 100
+        codigoperfil:
+          type: string
+          maxLength: 100
+        aplicacao_id:
+          type: integer
+          readOnly: true
+        aplicacao_codigo:
+          type: string
+          readOnly: true
+        aplicacao_nome:
+          type: string
+          readOnly: true
+        group_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        group_name:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - aplicacao_codigo
+      - aplicacao_id
+      - aplicacao_nome
+      - codigoperfil
+      - group_id
+      - group_name
+      - id
+      - nomeperfil
+    SituacaoAcao:
+      type: object
+      properties:
+        idsituacaoacao:
+          type: integer
+          readOnly: true
+        strdescricaosituacao:
+          type: string
+          maxLength: 50
+      required:
+      - idsituacaoacao
+      - strdescricaosituacao
+    UserCreate:
+      type: object
+      description: |-
+        GAP-01 — Criação atômica de auth.User + UserProfile.
+        Apenas PORTAL_ADMIN pode acionar este serializer (garantido na view).
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+          default: ''
+          maxLength: 150
+        last_name:
+          type: string
+          default: ''
+          maxLength: 150
+        name:
+          type: string
+          maxLength: 200
+        orgao:
+          type: string
+          maxLength: 100
+        status_usuario:
+          type: integer
+          default: 1
+        tipo_usuario:
+          type: integer
+          default: 1
+        classificacao_usuario:
+          type: integer
+          default: 1
+        user_id:
+          type: integer
+          readOnly: true
+        datacriacao:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - datacriacao
+      - email
+      - name
+      - orgao
+      - password
+      - user_id
+      - username
+    UserCreateWithRole:
+      type: object
+      description: |-
+        FASE 6 — Criação atômica de auth.User + UserProfile + UserRole + sync de permissões.
+        FASE 4 — usa sync_user_permissions() (orquestrador idempotente) em vez de
+                 sync_user_permissions_from_group() (incremental).
+        FIX     — retorna permissions_added: int com o total de permissões materializadas
+                  para o novo usuário. Calculado via calculate_effective_permissions()
+                  antes do sync para evitar dupla chamada ao banco.
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+          default: ''
+          maxLength: 150
+        last_name:
+          type: string
+          default: ''
+          maxLength: 150
+        name:
+          type: string
+          maxLength: 200
+        orgao:
+          type: string
+          maxLength: 100
+        status_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        tipo_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        classificacao_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        aplicacao_id:
+          type: integer
+        role_id:
+          type: integer
+      required:
+      - aplicacao_id
+      - email
+      - name
+      - orgao
+      - password
+      - role_id
+      - username
+    UserPermissionOverride:
+      type: object
+      description: |-
+        FASE-7 (Issue #20) — Serializer para UserPermissionOverride.
+
+        Resolve o ImportError crítico que impedia o carregamento de views.py
+        e quebrava o URL routing completo do Django (~135 testes afetados).
+
+        Campos expostos:
+          - id              : PK do override (read_only via ModelSerializer)
+          - user            : FK para auth.User (PK inteira)
+          - permission      : FK para auth.Permission (PK inteira)
+          - mode            : 'grant' | 'revoke'
+          - source          : origem do override (ex: 'admin manual') — opcional
+          - reason          : justificativa para auditoria — opcional
+          - created_at      : timestamp de criação (read_only)
+          - updated_at      : timestamp da última atualização (read_only)
+          - created_by      : usuário que criou (read_only — preenchido pela view via AuditableMixin)
+          - updated_by      : último usuário que atualizou (read_only — idem)
+
+        Validação:
+          validate() impede coexistência de override 'grant' e 'revoke' para o
+          mesmo par (user, permission), espelhando o clean() do model em nível DRF
+          para garantir resposta 400 em vez de exceção não tratada.
+
+        FIX (Issue #21):
+          create() e update() sobrescritos para descartar created_by_name e
+          updated_by_name injetados pelo AuditableMixin (campos inexistentes no
+          model UserPermissionOverride) e mapear created_by_id/updated_by_id
+          para as FKs created_by/updated_by do model.
+
+        Referências: ADR-PERM-01, divergência D-04, Issue #18, Issue #20, Issue #21.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          description: Usuário ao qual o override se aplica.
+        permission:
+          type: integer
+          description: Permissão Django (auth.Permission) que está sendo sobrescrita.
+        mode:
+          allOf:
+          - $ref: '#/components/schemas/ModeEnum'
+          description: |-
+            'grant' adiciona a permissão ao usuário independentemente da role. 'revoke' retira a permissão mesmo que a role a conceda.
+
+            * `grant` - Grant — conceder permissão extra
+            * `revoke` - Revoke — retirar permissão da role
+        source:
+          type: string
+          description: 'Origem do override (ex: ''admin manual'', ''integração XPTO'').
+            Opcional.'
+          maxLength: 200
+        reason:
+          type: string
+          description: Justificativa detalhada para o override. Opcional, mas recomendada
+            para auditoria.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Usuário que criou o override (auditoria).
+        updated_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Último usuário a atualizar o override (auditoria).
+      required:
+      - created_at
+      - created_by
+      - id
+      - mode
+      - permission
+      - updated_at
+      - updated_by
+      - user
+    UserPermissionOverrideForbiddenErrorCreate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideForbiddenErrorDestroy:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideForbiddenErrorList:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideForbiddenErrorPartialUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideForbiddenErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideForbiddenErrorUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideNotFoundErrorDestroy:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideNotFoundErrorPartialUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideNotFoundErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideNotFoundErrorUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedError:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedErrorCreate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedErrorDestroy:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedErrorPartialUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedErrorRetrieve:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserPermissionOverrideUnauthorizedErrorUpdate:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - detail
+    UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        status_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        tipo_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        classificacao_usuario:
+          type: integer
+          maximum: 32767
+          minimum: -32768
+        orgao:
+          type: string
+          nullable: true
+          maxLength: 100
+        datacriacao:
+          type: string
+          format: date-time
+          readOnly: true
+        data_alteracao:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - data_alteracao
+      - datacriacao
+      - email
+      - user_id
+      - username
+    UserRole:
+      type: object
+      description: |-
+        GAP-04 — Validações de negócio:
+        R-01: unicidade por (user, aplicacao).
+        R-02: a role atribuída deve pertencer à aplicacao informada.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        aplicacao:
+          type: integer
+          nullable: true
+        aplicacao_codigo:
+          type: string
+          readOnly: true
+        role:
+          type: integer
+        role_codigo:
+          type: string
+          readOnly: true
+      required:
+      - aplicacao_codigo
+      - id
+      - role
+      - role_codigo
+      - user
+    UserRoleDashboard:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        aplicacao_codigo:
+          type: string
+          readOnly: true
+        role_codigo:
+          type: string
+          readOnly: true
+        role_nome:
+          type: string
+          readOnly: true
+      required:
+      - aplicacao_codigo
+      - id
+      - role_codigo
+      - role_nome
+    UserRoleNested:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        aplicacao_codigo:
+          type: string
+          readOnly: true
+        aplicacao_nome:
+          type: string
+          readOnly: true
+        role_codigo:
+          type: string
+          readOnly: true
+        role_nome:
+          type: string
+          readOnly: true
+      required:
+      - aplicacao_codigo
+      - aplicacao_nome
+      - id
+      - role_codigo
+      - role_nome
+    VigenciaPNGI:
+      type: object
+      description: |-
+        Serializer base para models que herdam de AuditableModel.
+
+        Expoe os campos de auditoria como read-only no output da API.
+        Os campos são preenchidos automaticamente pelo AuditableMixin
+        no perform_create/perform_update — nunca pelo cliente.
+
+        Uso:
+            class AcaoSerializer(AuditableModelSerializer):
+                class Meta(AuditableModelSerializer.Meta):
+                    model = Acoes
+                    fields = AuditableModelSerializer.Meta.fields + [
+                        "strapelido",
+                        "strdescricaoacao",
+                        # ... campos específicos
+                    ]
+
+        Campos de auditoria incluídos automaticamente (todos read-only):
+          created_by_id   — ID do usuário que criou
+          created_by_name — snapshot do username na criação
+          updated_by_id   — ID do usuário da última alteração
+          updated_by_name — snapshot do username na alteração
+          created_at      — timestamp de criação
+          updated_at      — timestamp da última alteração
+      properties:
+        created_by_id:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        updated_by_id:
+          type: integer
+          readOnly: true
+        updated_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        idvigenciapngi:
+          type: integer
+          readOnly: true
+        strdescricao:
+          type: string
+          maxLength: 200
+        datiniciovigencia:
+          type: string
+          format: date
+        datfinalvigencia:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - created_at
+      - created_by_id
+      - created_by_name
+      - datiniciovigencia
+      - idvigenciapngi
+      - strdescricao
+      - updated_at
+      - updated_by_id
+      - updated_by_name
+  securitySchemes:
+    gppSessionAuth:
+      type: apiKey
+      in: cookie
+      name: gpp_session_{APP}
+      description: 'Autenticação via cookie de sessão GPP. O nome do cookie varia
+        por aplicação: `gpp_session_PORTAL`, `gpp_session_ACOES_PNGI`, etc. Obtenha
+        o cookie fazendo POST em `/api/accounts/login/`.'
+tags:
+- name: 0 - Autenticação
+  description: Login, logout e sessão do usuário
+- name: 1 - Usuários
+  description: Perfis, roles e permissões
+- name: 2 - Portal
+  description: Dashboard e aplicações do portal
+- name: 3 - Ações PNGI
+  description: Ações, prazos, anotações e destaques
+- name: 4 - Carga Org/Lot
+  description: Carga de organogramas e loteamentos
+- name: 5 - Utilitários
+  description: Health check e logs de frontend

@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: POST
+PATH: /api/accounts/permission-overrides/
+TOOL: accounts_permission_overrides_create
+AUTH_REQUIRED: True

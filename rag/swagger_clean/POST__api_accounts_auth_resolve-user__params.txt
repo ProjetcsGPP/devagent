@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[]
+
+REQUEST_SCHEMA:
+{"identifier": {"type": "string", "required": true, "description": null, "example": "joao@gov.br", "enum": null, "format": null, "default": null}}

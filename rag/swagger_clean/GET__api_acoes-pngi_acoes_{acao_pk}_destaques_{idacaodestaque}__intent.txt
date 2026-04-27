@@ -1,0 +1,11 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+Destaques de uma Ação PNGI.
+Filtrado pelo idacao passado na URL.
+
+TAGS:
+['3 - Ações PNGI']

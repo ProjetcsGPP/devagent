@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[]
+
+REQUEST_SCHEMA:
+{"username": {"type": "string", "required": true, "description": null, "example": "joao.silva", "enum": null, "format": null, "default": null}, "password": {"type": "string", "required": true, "description": null, "example": "senha123", "enum": null, "format": null, "default": null}, "app_context": {"type": "string", "required": true, "description": null, "example": "PORTAL", "enum": null, "format": null, "default": null}}

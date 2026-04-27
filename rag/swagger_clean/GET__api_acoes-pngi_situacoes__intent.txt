@@ -1,0 +1,11 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+Situações possíveis de uma Ação PNGI.
+Somente leitura para todos os usuários autenticados.
+
+TAGS:
+['3 - Ações PNGI']

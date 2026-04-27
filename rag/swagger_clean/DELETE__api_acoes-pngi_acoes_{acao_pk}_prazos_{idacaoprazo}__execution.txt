@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: DELETE
+PATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/
+TOOL: acoes_pngi_acoes_prazos_destroy
+AUTH_REQUIRED: True
