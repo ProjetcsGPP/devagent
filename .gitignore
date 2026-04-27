@@ -1,9 +1,38 @@
+# =========================
+# PYTHON
+# =========================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# =========================
+# VIRTUAL ENV
+# =========================
 venv/
-storage/*.json
-storage/*.index
-rag/swagger_clean/
-workspace/
-backend/
-frontend/
+.env/
+.venv/
+
+# =========================
+# DATA / STORAGE (LOCAL ONLY)
+# =========================
+storage/
+rag/storage/
+dev_agent/memory/memory.json
+storage/session.json
+
+# =========================
+# LOGS
+# =========================
+*.log
+
+# =========================
+# IDE / EDITORS
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS FILES
+# =========================
+.DS_Store

@@ -1,0 +1,14 @@
+TYPE: INTENT
+
+SUMMARY:
+Logout de uma aplicação específica
+
+DESCRIPTION:
+Revoga a sessão da app informada via `app_slug` e apaga o cookie `gpp_session_<APP>` correspondente.
+
+Este endpoint **não exige autenticação** — a identificação da sessão é feita diretamente pelo cookie `gpp_session_<APP>` presente na requisição. O frontend deve enviar `credentials: 'include'` para que o browser inclua o cookie automaticamente.
+
+Se o cookie não estiver presente, o endpoint retorna `200` com mensagem indicando que não havia sessão ativa — não retorna erro.
+
+TAGS:
+['0 - Autenticação']

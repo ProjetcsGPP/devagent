@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/acoes/
+TOOL: acoes_pngi_acoes_list
+AUTH_REQUIRED: True

@@ -1,0 +1,10 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+Gerencia UserRoles. Apenas PORTAL_ADMIN.
+
+TAGS:
+['1 - Usuários']

@@ -1,0 +1,794 @@
+[
+  {
+    "id": "POST__api_acoes-pngi_acoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_vigencias__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datiniciovigencia\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}, \"datfinalvigencia\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}}"
+  },
+  {
+    "id": "GET__api_accounts_me_permissions__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/me/permissions/\nTOOL: accounts_me_permissions_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_prazos__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/\nTOOL: acoes_pngi_acoes_prazos_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{idacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acoes.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_roles_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este Role.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_vigencias_{idvigenciapngi}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/\nTOOL: acoes_pngi_vigencias_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_logout_{app_slug}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"app_slug\", \"in\": \"path\", \"required\": true, \"type\": \"string\", \"description\": \"Slug (código interno) da aplicação a deslogar (ex: `portal`, `sigef`).\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/eixos/\nTOOL: acoes_pngi_eixos_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos_{ideixo}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nEixos temáticos do programa PNGI.\nSomente leitura para todos os usuários autenticados.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_profiles_{user_id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"user_id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor único que identifica este User Profile.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_permission-overrides__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"user\": {\"type\": \"integer\", \"required\": true, \"description\": \"Usuário ao qual o override se aplica.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"permission\": {\"type\": \"integer\", \"required\": true, \"description\": \"Permissão Django (auth.Permission) que está sendo sobrescrita.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"mode\": {\"type\": \"object\", \"required\": true, \"description\": \"'grant' adiciona a permissão ao usuário independentemente da role. 'revoke' retira a permissão mesmo que a role a conceda.\\n\\n* `grant` - Grant — conceder permissão extra\\n* `revoke` - Revoke — retirar permissão da role\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"source\": {\"type\": \"string\", \"required\": false, \"description\": \"Origem do override (ex: 'admin manual', 'integração XPTO'). Opcional.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"reason\": {\"type\": \"string\", \"required\": false, \"description\": \"Justificativa detalhada para o override. Opcional, mas recomendada para auditoria.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"created_by\": {\"type\": \"integer\", \"required\": true, \"description\": \"Usuário que criou o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by\": {\"type\": \"integer\", \"required\": true, \"description\": \"Último usuário a atualizar o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{idacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/acoes-pngi/acoes/{idacao}/\nTOOL: acoes_pngi_acoes_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_vigencias_{idvigenciapngi}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idvigenciapngi\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este vigencia pngi.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datiniciovigencia\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}, \"datfinalvigencia\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{idacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acoes.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacao\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strapelido\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoacao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoentrega\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdataentrega\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoentravealerta_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idsituacaoacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"ideixo_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/permission-overrides/\nTOOL: accounts_permission_overrides_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_user-roles__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/user-roles/\nTOOL: accounts_user_roles_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/\nTOOL: acoes_pngi_acoes_anotacoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_destaques__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaodestaque\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdatadestaque\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/\nTOOL: acoes_pngi_acoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes_{idaplicacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGET /api/portal/aplicacoes/         → lista apps visíveis no portal\nGET /api/portal/aplicacoes/{id}/    → detalhe de uma app\nRequer autenticação.\n\nTAGS:\n['2 - Portal']"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGET /api/portal/aplicacoes/         → lista apps visíveis no portal\nGET /api/portal/aplicacoes/{id}/    → detalhe de uma app\nRequer autenticação.\n\nTAGS:\n['2 - Portal']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacao\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strapelido\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoacao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoentrega\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdataentrega\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoentravealerta_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idsituacaoacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"ideixo_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes_{idaplicacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nDetalhar aplicação visível ao usuário\n\nDESCRIPTION:\nRetorna os dados de uma aplicação específica visível ao usuário autenticado.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** requer autenticação (`IsAuthenticated`).\n\n**Escopo de visibilidade:**\n- `PORTAL_ADMIN` ou `superuser`: pode consultar qualquer aplicação.\n- usuário comum: pode consultar apenas aplicações nas quais possui `UserRole`.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{idacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/acoes-pngi/acoes/{idacao}/\nTOOL: acoes_pngi_acoes_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_profiles__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/profiles/\nTOOL: accounts_profiles_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_profiles_{user_id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAPIs de UserProfile.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_core_frontendlog__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"level\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"error\", \"enum\": [\"debug\", \"info\", \"warn\", \"error\"], \"format\": null, \"default\": null}, \"message\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"TypeError: Cannot read properties of null\", \"enum\": null, \"format\": null, \"default\": null}, \"context\": {\"type\": \"object\", \"required\": false, \"description\": null, \"example\": {\"page\": \"/dashboard\", \"user_agent\": \"Mozilla/5.0\"}, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_accounts_user-roles__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/user-roles/\nTOOL: accounts_user_roles_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_logout__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nListar aplicações públicas\n\nDESCRIPTION:\nRetorna a lista de aplicações públicas disponíveis para seleção na tela de login.\n\n**Acesso:** endpoint público (`AllowAny`).\n**Autenticação:** não requer autenticação.\n**Sessão:** não usa cookie de sessão.\n\n**Uso principal:** popular o seletor de aplicações (`app_context`) no frontend antes do login.\n\n**Filtro aplicado:** retorna apenas aplicações ativas e visíveis, ou seja, não bloqueadas e prontas para produção.\n\nTAGS:\n['5 - Utilitários']"
+  },
+  {
+    "id": "GET__api_accounts_roles_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/roles/{id}/\nTOOL: accounts_roles_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos_{ideixo}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/eixos/{ideixo}/\nTOOL: acoes_pngi_eixos_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_profiles_{user_id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/profiles/{user_id}/\nTOOL: accounts_profiles_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_logout_{app_slug}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nLogout de uma aplicação específica\n\nDESCRIPTION:\nRevoga a sessão da app informada via `app_slug` e apaga o cookie `gpp_session_<APP>` correspondente.\n\nEste endpoint **não exige autenticação** — a identificação da sessão é feita diretamente pelo cookie `gpp_session_<APP>` presente na requisição. O frontend deve enviar `credentials: 'include'` para que o browser inclua o cookie automaticamente.\n\nSe o cookie não estiver presente, o endpoint retorna `200` com mensagem indicando que não havia sessão ativa — não retorna erro.\n\nTAGS:\n['0 - Autenticação']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/\nTOOL: acoes_pngi_acoes_prazos_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{idacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/\nTOOL: acoes_pngi_acoes_prazos_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nListar aplicações visíveis ao usuário\n\nDESCRIPTION:\nRetorna as aplicações disponíveis ao usuário autenticado no contexto pós-login.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** requer autenticação (`IsAuthenticated`).\n\n**Escopo de visibilidade:**\n- `PORTAL_ADMIN` ou `superuser`: visualiza todas as aplicações sem restrição.\n- usuário comum: visualiza apenas as aplicações nas quais possui `UserRole`, com filtro adicional para apps não bloqueadas e prontas para produção.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_anotacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/\nTOOL: acoes_pngi_acoes_destaques_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoanotacaoalinhamento\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao anotacao alinhamento.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_roles_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGET /api/accounts/roles/\nGET /api/accounts/roles/{id}/\nAcesso exclusivo a PORTAL_ADMIN.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_me__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/\nTOOL: acoes_pngi_acoes_prazos_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/auth/aplicacoes/\nTOOL: accounts_auth_aplicacoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes_{idsituacaoacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nSituações possíveis de uma Ação PNGI.\nSomente leitura para todos os usuários autenticados.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_user-roles_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGerencia UserRoles. Apenas PORTAL_ADMIN.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaodestaque\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao destaque.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoprazo\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao prazo.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_anotacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoanotacaoalinhamento\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoanotacaoalinhamento_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias_{idvigenciapngi}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idvigenciapngi\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este vigencia pngi.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{idacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acoes.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_me_permissions__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_core_frontendlog__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nLog de erros do frontend\n\nDESCRIPTION:\nRecebe eventos de erro/log gerados pelo frontend e os registra no logger de segurança do servidor. Requer autenticação.\n\nTAGS:\n['5 - Utilitários']"
+  },
+  {
+    "id": "GET__api_accounts_me__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nDados do usuário autenticado\n\nDESCRIPTION:\nRetorna os dados do usuário autenticado na sessão atual: profile, roles e apps com acesso.\n\nA autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.\n\nEste endpoint não aceita tokens JWT. A sessão é vinculada ao contexto de aplicação (`app_context`) definido no momento do login.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/acoes-pngi/acoes/\nTOOL: acoes_pngi_acoes_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaodestaque\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao destaque.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaodestaque\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdatadestaque\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}}"
+  },
+  {
+    "id": "DELETE__api_accounts_permission-overrides_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nRemover override de permissão\n\nDESCRIPTION:\nRemove um `UserPermissionOverride` existente.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** a remoção do override afeta as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a exclusão.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes_{idaplicacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/aplicacoes/{idaplicacao}/\nTOOL: accounts_aplicacoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_users__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/users/\nTOOL: accounts_users_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_prazos__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_roles__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/roles/\nTOOL: accounts_roles_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias_{idvigenciapngi}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/\nTOOL: acoes_pngi_vigencias_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_accounts_user-roles_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Role.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_accounts_permission-overrides_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nAtualizar parcialmente override de permissão\n\nDESCRIPTION:\nAtualiza parcialmente um `UserPermissionOverride` existente.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** a alteração parcial afeta as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a mutação.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_user-roles__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGerencia UserRoles. Apenas PORTAL_ADMIN.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/situacoes/\nTOOL: acoes_pngi_situacoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nSituações possíveis de uma Ação PNGI.\nSomente leitura para todos os usuários autenticados.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_me_permissions__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nPermissões do usuário na app atual\n\nDESCRIPTION:\nRetorna a role e as permissões do usuário autenticado na aplicação da sessão atual (`app_context`).\n\nA autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.\n\nO `app_context` é resolvido pelo `AppContextMiddleware` a partir do cookie de sessão e da tabela `AccountsSession`. O resultado é gravado diretamente em `request.app_context` — este endpoint depende obrigatoriamente desse middleware estar ativo na requisição.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_accounts_auth_resolve-user__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/auth/resolve-user/\nTOOL: accounts_auth_resolve_user_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/\nTOOL: acoes_pngi_acoes_destaques_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_login__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nLogin via sessão\n\nDESCRIPTION:\nAutentica o usuário e cria uma sessão por aplicação `gpp_session_<app_context>` (ex: `gpp_session_PORTAL`). Requer `username`, `password` e `app_context`.\n\n**Autenticação via cookie HttpOnly:** após o login bem-sucedido, o servidor retorna o header `Set-Cookie: gpp_session_<APP>=<session_key>; HttpOnly; SameSite=Lax`. O frontend **deve** usar `withCredentials: true` (axios) ou `credentials: 'include'` (fetch) em todas as requisições subsequentes para que o browser envie o cookie automaticamente.\n\nO header `X-CSRFToken` é rotacionado via `rotate_token()` a cada login — o frontend deve reler o cookie `csrftoken` e incluir o novo valor no header `X-CSRFToken` nas próximas requisições mutantes (POST/PUT/PATCH/DELETE).\n\nTAGS:\n['0 - Autenticação']"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_accounts_users_create-with-role__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"username\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"email\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"email\", \"default\": null}, \"password\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"first_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": \"\"}, \"last_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": \"\"}, \"name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"orgao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"status_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"tipo_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"classificacao_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"aplicacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"role_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/\nTOOL: acoes_pngi_acoes_prazos_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/\nTOOL: acoes_pngi_acoes_anotacoes_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_accounts_profiles_{user_id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"user_id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID do usuário dono do perfil a ser consultado/atualizado.\"}]\n\nREQUEST_SCHEMA:\n{\"user_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"username\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"email\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"status_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"tipo_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"classificacao_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"orgao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datacriacao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"data_alteracao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_vigencias_{idvigenciapngi}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PATCH__api_accounts_permission-overrides_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Permission Override.\"}]\n\nREQUEST_SCHEMA:\n{\"id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"user\": {\"type\": \"integer\", \"required\": false, \"description\": \"Usuário ao qual o override se aplica.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"permission\": {\"type\": \"integer\", \"required\": false, \"description\": \"Permissão Django (auth.Permission) que está sendo sobrescrita.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"mode\": {\"type\": \"object\", \"required\": false, \"description\": \"'grant' adiciona a permissão ao usuário independentemente da role. 'revoke' retira a permissão mesmo que a role a conceda.\\n\\n* `grant` - Grant — conceder permissão extra\\n* `revoke` - Revoke — retirar permissão da role\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"source\": {\"type\": \"string\", \"required\": false, \"description\": \"Origem do override (ex: 'admin manual', 'integração XPTO'). Opcional.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"reason\": {\"type\": \"string\", \"required\": false, \"description\": \"Justificativa detalhada para o override. Opcional, mas recomendada para auditoria.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"created_by\": {\"type\": \"integer\", \"required\": false, \"description\": \"Usuário que criou o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by\": {\"type\": \"integer\", \"required\": false, \"description\": \"Último usuário a atualizar o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/\nTOOL: acoes_pngi_acoes_anotacoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_user-roles__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nVincular role a usuário\n\nDESCRIPTION:\nCria um vínculo `UserRole` entre usuário, role e aplicação.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Efeito colateral:** após a criação do vínculo, o endpoint executa `sync_user_permissions(user)` para sincronizar as permissões efetivas do usuário de forma atômica.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_authz_version__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_anotacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/\nTOOL: acoes_pngi_acoes_anotacoes_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{idacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acoes.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacao\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strapelido\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoacao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricaoentrega\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdataentrega\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoentravealerta_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idsituacaoacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"ideixo_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_destaques__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes_{idaplicacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idaplicacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID da aplicação a ser consultada.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/aplicacoes/\nTOOL: accounts_aplicacoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_portal_dashboard__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_users__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nCriar usuário (sem role)\n\nDESCRIPTION:\nCria atomicamente um `auth.User` e seu `UserProfile` vinculado.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:**\n- `401 Unauthorized` — sessão ausente ou expirada (não autenticado).\n- `403 Forbidden` — autenticado, mas sem a permissão `CanCreateUser` ou fora do escopo de aplicações que o operador gerencia.\n\n**Campo `password`:** write-only. Nunca é retornado na resposta.\n\n**Atomicidade:** criação do `User` e do `UserProfile` ocorre em uma única transação — em caso de falha, nenhum registro parcial é persistido.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes_{idsituacaoacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/situacoes/{idsituacaoacao}/\nTOOL: acoes_pngi_situacoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_user-roles_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/user-roles/{id}/\nTOOL: accounts_user_roles_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Permission Override.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_profiles__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAPIs de UserProfile.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_authz_version__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/authz/version/\nTOOL: accounts_authz_version_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_accounts_permission-overrides_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/accounts/permission-overrides/{id}/\nTOOL: accounts_permission_overrides_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/portal/aplicacoes/\nTOOL: portal_aplicacoes_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{idacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{idacao}/\nTOOL: acoes_pngi_acoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes_{codigointerno}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/auth/aplicacoes/{codigointerno}/\nTOOL: accounts_auth_aplicacoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_profiles__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_user-roles_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Role.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoanotacaoalinhamento\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao anotacao alinhamento.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoanotacaoalinhamento\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoanotacaoalinhamento_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nListar overrides de permissão\n\nDESCRIPTION:\nRetorna a lista de overrides de permissão (`UserPermissionOverride`).\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** cada override representa uma alteração explícita nas permissões efetivas de um usuário. As mutações neste recurso disparam `sync_user_permissions(user)`, atualizando imediatamente o conjunto efetivo de permissões do usuário.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "PUT__api_accounts_permission-overrides_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nAtualizar override de permissão\n\nDESCRIPTION:\nAtualiza completamente um `UserPermissionOverride` existente.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** a atualização altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a mutação.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_me__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/me/\nTOOL: accounts_me_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoanotacaoalinhamento\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao anotacao alinhamento.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_user-roles__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_vigencias_{idvigenciapngi}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "DELETE__api_accounts_permission-overrides_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Permission Override.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_vigencias_{idvigenciapngi}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idvigenciapngi\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este vigencia pngi.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idvigenciapngi\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datiniciovigencia\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}, \"datfinalvigencia\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date\", \"default\": null}}"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes_{idaplicacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idaplicacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este Aplicação.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{idacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_accounts_profiles_{user_id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/accounts/profiles/{user_id}/\nTOOL: accounts_profiles_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaodestaque\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao destaque.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaodestaque\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datdatadestaque\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}}"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaodestaque\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao destaque.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_vigencias_{idvigenciapngi}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/vigencias/\nTOOL: acoes_pngi_vigencias_list\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_vigencias_{idvigenciapngi}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/\nTOOL: acoes_pngi_vigencias_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_vigencias_{idvigenciapngi}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/\nTOOL: acoes_pngi_vigencias_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoprazo\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao prazo.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_prazos__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoprazo\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"isacaoprazoativo\": {\"type\": \"boolean\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strprazo\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{idacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/acoes-pngi/acoes/{idacao}/\nTOOL: acoes_pngi_acoes_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_accounts_profiles_{user_id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nAtualizar parcialmente perfil de usuário\n\nDESCRIPTION:\nAtualiza parcialmente um `UserProfile` existente.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Parâmetro de rota:** `user_id` identifica o usuário dono do perfil.\n\n**Permissões e cenários de `403 Forbidden`:**\n- sem permissão para editar o perfil alvo;\n- tentativa de alterar `classificacao_usuario` sem privilégio administrativo;\n- tentativa de alterar `status_usuario` sem privilégio administrativo.\n\n**Observação:** esta operação é parcial (`PATCH`), portanto apenas os campos enviados no payload serão alterados.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_accounts_auth_resolve-user__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nResolve username a partir de email ou username\n\nDESCRIPTION:\nRecebe um identificador (email ou username) e retorna o username canônico. Usado pelo frontend antes do login para normalizar o campo digitado pelo usuário.\n\n**Anti-enumeração (R-02):** o `404` é retornado tanto para identificadores inexistentes quanto para contas desativadas — sem distinguir os dois casos — para evitar que um atacante confirme a existência de um e-mail no sistema.\n\nEste endpoint é público (`AllowAny`). O frontend **não** precisa enviar cookie nem `withCredentials: true` nesta chamada.\n\nTAGS:\n['0 - Autenticação']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/\nTOOL: acoes_pngi_acoes_destaques_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_accounts_authz_version__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nVersão de autorização do usuário autenticado\n\nDESCRIPTION:\nRetorna o número de versão de autorização do usuário autenticado. Usado **exclusivamente** pelo frontend para invalidação de cache — não representa permissões reais e não deve ser usado em decisões de autorização.\n\nA versão começa em `0` quando o usuário ainda não possui um `UserAuthzState` (nenhuma mudança de permissão ocorreu desde a criação da conta). O valor é incrementado automaticamente a cada sync de permissões.\n\nQuando o valor de `authz_version` mudar desde o último check, o frontend deve refazer `GET /me/permissions/`, atualizar o JSON de navegação e invalidar caches locais (React Query / Zustand).\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/\nTOOL: acoes_pngi_acoes_anotacoes_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nEixos temáticos do programa PNGI.\nSomente leitura para todos os usuários autenticados.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_vigencias_{idvigenciapngi}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idvigenciapngi\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este vigencia pngi.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_login__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/login/\nTOOL: accounts_login_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_vigencias_{idvigenciapngi}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_situacoes_{idsituacaoacao}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"idsituacaoacao\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este situacao acao.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/\nTOOL: acoes_pngi_acoes_destaques_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_accounts_users_create-with-role__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/users/create-with-role/\nTOOL: accounts_users_create_with_role_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_accounts_permission-overrides_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/accounts/permission-overrides/{id}/\nTOOL: accounts_permission_overrides_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_user-roles__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"user\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"aplicacao\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"aplicacao_codigo\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"role\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"role_codigo\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_destaques__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_accounts_auth_resolve-user__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"identifier\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"joao@gov.br\", \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "POST__api_accounts_login__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"username\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"joao.silva\", \"enum\": null, \"format\": null, \"default\": null}, \"password\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"senha123\", \"enum\": null, \"format\": null, \"default\": null}, \"app_context\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": \"PORTAL\", \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoanotacaoalinhamento\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao anotacao alinhamento.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoanotacaoalinhamento\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idtipoanotacaoalinhamento_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strdescricao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos_{ideixo}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"ideixo\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este eixo.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_accounts_logout__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nLogout da sessão atual\n\nDESCRIPTION:\nEncerra a sessão ativa e revoga o registro em AccountsSession.\n\nRequer que o frontend envie o cookie de sessão (`gpp_session_<APP>`) via `withCredentials: true` (axios) ou `credentials: 'include'` (fetch). Após o logout, o cookie deve ser removido pelo frontend.\n\nTAGS:\n['0 - Autenticação']"
+  },
+  {
+    "id": "GET__api_accounts_roles__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nGET /api/accounts/roles/\nGET /api/accounts/roles/{id}/\nAcesso exclusivo a PORTAL_ADMIN.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_portal_dashboard__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nDashboard do Portal.\n\nDESCRIPTION:\nRetorna todas as aplicações que o usuário autenticado tem permissão para acessar, retorna também os perfis do usuário para cada aplicação que está cadastrada.\n\nTAGS:\n['2 - Portal']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_vigencias__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/acoes-pngi/vigencias/\nTOOL: acoes_pngi_vigencias_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_permission-overrides__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nCriar override de permissão\n\nDESCRIPTION:\nCria um novo `UserPermissionOverride` para conceder ou revogar explicitamente uma permissão de um usuário.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** a criação do override altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a persistência.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nDetalhar override de permissão\n\nDESCRIPTION:\nRetorna os dados de um override de permissão específico.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Impacto funcional:** overrides afetam as permissões efetivas do usuário. As mutações neste recurso disparam `sync_user_permissions(user)` para recalcular imediatamente o estado efetivo.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_anotacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_permission-overrides_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/accounts/permission-overrides/{id}/\nTOOL: accounts_permission_overrides_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAnotações de alinhamento de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{idacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{idacao}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nAções PNGI — entidade principal.\n\nAcoes são independentes de orgão (iniciativas do programa PNGI).\nNÃO herda SecureQuerysetMixin.\nControle de acesso exclusivamente por roles via _load_role_matrix().\nAuditableMixin preenche created_by_id/name e updated_by_id/name.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PUT__api_accounts_permission-overrides_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/accounts/permission-overrides/{id}/\nTOOL: accounts_permission_overrides_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_users__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{\"username\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"email\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"email\", \"default\": null}, \"password\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"first_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": \"\"}, \"last_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": \"\"}, \"name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"orgao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"status_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": 1}, \"tipo_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": 1}, \"classificacao_usuario\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": 1}, \"user_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"datacriacao\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}}"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoprazo\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao prazo.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoprazo\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"isacaoprazoativo\": {\"type\": \"boolean\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strprazo\": {\"type\": \"string\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_portal_dashboard__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/portal/dashboard/\nTOOL: portal_dashboard_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_accounts_user-roles_{id}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/accounts/user-roles/{id}/\nTOOL: accounts_user_roles_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_accounts_permission-overrides__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/permission-overrides/\nTOOL: accounts_permission_overrides_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "POST__api_core_frontendlog__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/core/frontendlog/\nTOOL: core_frontendlog_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"acao_pk\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"ID (idacao) da Ação PNGI pai\"}, {\"name\": \"idacaoprazo\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este acao prazo.\"}]\n\nREQUEST_SCHEMA:\n{\"created_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by_name\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"idacaoprazo\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"idacao_id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"isacaoprazoativo\": {\"type\": \"boolean\", \"required\": false, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"strprazo\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "DELETE__api_accounts_user-roles_{id}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nRemover vínculo de role do usuário\n\nDESCRIPTION:\nRemove um vínculo `UserRole` existente.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.\n\n**Efeito colateral:** após a remoção do vínculo, o endpoint executa `sync_user_permissions(user)` para recalcular as permissões efetivas do usuário com base nas roles remanescentes.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_acoes-pngi_vigencias__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nVigências do programa PNGI.\n\nEscrita restrita a GESTOR_PNGI e COORDENADOR_PNGI.\nOPERADOR_ACAO e CONSULTOR_PNGI somente leitura.\nDeleção exclusiva do GESTOR_PNGI.\n\nUsa _load_vigencia_role_matrix() — matriz separada de _load_role_matrix()\npara garantir que OPERADOR_ACAO nao herde permissao de escrita de Acoes.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PUT__api_accounts_permission-overrides_{id}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"id\", \"in\": \"path\", \"required\": true, \"type\": \"integer\", \"description\": \"Um valor inteiro único que identifica este User Permission Override.\"}]\n\nREQUEST_SCHEMA:\n{\"id\": {\"type\": \"integer\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"user\": {\"type\": \"integer\", \"required\": true, \"description\": \"Usuário ao qual o override se aplica.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"permission\": {\"type\": \"integer\", \"required\": true, \"description\": \"Permissão Django (auth.Permission) que está sendo sobrescrita.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"mode\": {\"type\": \"object\", \"required\": true, \"description\": \"'grant' adiciona a permissão ao usuário independentemente da role. 'revoke' retira a permissão mesmo que a role a conceda.\\n\\n* `grant` - Grant — conceder permissão extra\\n* `revoke` - Revoke — retirar permissão da role\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"source\": {\"type\": \"string\", \"required\": false, \"description\": \"Origem do override (ex: 'admin manual', 'integração XPTO'). Opcional.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"reason\": {\"type\": \"string\", \"required\": false, \"description\": \"Justificativa detalhada para o override. Opcional, mas recomendada para auditoria.\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"created_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"updated_at\": {\"type\": \"string\", \"required\": true, \"description\": null, \"example\": null, \"enum\": null, \"format\": \"date-time\", \"default\": null}, \"created_by\": {\"type\": \"integer\", \"required\": true, \"description\": \"Usuário que criou o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}, \"updated_by\": {\"type\": \"integer\", \"required\": true, \"description\": \"Último usuário a atualizar o override (auditoria).\", \"example\": null, \"enum\": null, \"format\": null, \"default\": null}}"
+  },
+  {
+    "id": "GET__api_portal_aplicacoes_{idaplicacao}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: GET\nPATH: /api/portal/aplicacoes/{idaplicacao}/\nTOOL: portal_aplicacoes_retrieve\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_roles__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_eixos__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"page\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Um número de página dentro do conjunto de resultados paginado.\"}, {\"name\": \"page_size\", \"in\": \"query\", \"required\": false, \"type\": \"integer\", \"description\": \"Número de resultados a serem retornados por página.\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes_{codigointerno}__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[{\"name\": \"codigointerno\", \"in\": \"path\", \"required\": true, \"type\": \"string\", \"description\": \"Código interno da aplicação pública (ex: `PORTAL`, `SIGEF`).\"}]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "POST__api_acoes-pngi_acoes_{acao_pk}_destaques__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/\nTOOL: acoes_pngi_acoes_destaques_create\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_aplicacoes__params.txt",
+    "text": "TYPE: PARAMETERS\n\nPARAMETERS:\n[]\n\nREQUEST_SCHEMA:\n{}"
+  },
+  {
+    "id": "GET__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PATCH\nPATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/\nTOOL: acoes_pngi_acoes_prazos_partial_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PATCH__api_acoes-pngi_acoes_{acao_pk}_prazos_{idacaoprazo}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nPrazos de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_accounts_users_create-with-role__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nCriar usuário com role (fluxo completo)\n\nDESCRIPTION:\nCria atomicamente `auth.User` + `UserProfile` + `UserRole` e dispara sincronização de permissões via `sync_user_permissions`.\n\n**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.\n\n**Permissões:**\n- `401 Unauthorized` — sessão ausente ou expirada (não autenticado).\n- `403 Forbidden (papel insuficiente)` — autenticado, mas não é `PORTAL_ADMIN` nem `superuser`.\n- `403 Forbidden (escopo)` — é `PORTAL_ADMIN`, mas a `aplicacao` de destino está fora das aplicações que o operador gerencia.\n\n**Atomicidade:** `User`, `UserProfile`, `UserRole` e o sync de permissões ocorrem em uma única transação — em caso de falha, nenhum registro parcial é persistido.\n\n**Resposta:** retorna um `dict` customizado com os dados do usuário criado, sua role e a aplicação vinculada.\n\nTAGS:\n['1 - Usuários']"
+  },
+  {
+    "id": "POST__api_accounts_logout_{app_slug}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/logout/{app_slug}/\nTOOL: accounts_logout_app\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\n\n\nDESCRIPTION:\nDestaques de uma Ação PNGI.\nFiltrado pelo idacao passado na URL.\n\nTAGS:\n['3 - Ações PNGI']"
+  },
+  {
+    "id": "POST__api_accounts_logout__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: POST\nPATH: /api/accounts/logout/\nTOOL: accounts_logout_session\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "DELETE__api_acoes-pngi_acoes_{acao_pk}_anotacoes_{idacaoanotacaoalinhamento}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: DELETE\nPATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/{idacaoanotacaoalinhamento}/\nTOOL: acoes_pngi_acoes_anotacoes_destroy\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "PUT__api_acoes-pngi_acoes_{acao_pk}_destaques_{idacaodestaque}__execution.txt",
+    "text": "TYPE: EXECUTION\n\nMETHOD: PUT\nPATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/\nTOOL: acoes_pngi_acoes_destaques_update\nAUTH_REQUIRED: True"
+  },
+  {
+    "id": "GET__api_accounts_auth_aplicacoes_{codigointerno}__intent.txt",
+    "text": "TYPE: INTENT\n\nSUMMARY:\nDetalhar aplicação pública\n\nDESCRIPTION:\nRetorna os dados de uma aplicação pública específica pelo seu `codigointerno`.\n\n**Acesso:** endpoint público (`AllowAny`).\n**Autenticação:** não requer autenticação.\n**Sessão:** não usa cookie de sessão.\n\n**Uso principal:** consulta de uma aplicação exibida no seletor da tela de login.\n\n**Filtro aplicado:** somente aplicações ativas e visíveis são expostas por este endpoint.\n\nTAGS:\n['5 - Utilitários']"
+  }
+]

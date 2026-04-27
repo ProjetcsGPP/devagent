@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "acao_pk", "in": "path", "required": true, "type": "integer", "description": "ID (idacao) da Ação PNGI pai"}, {"name": "idacaodestaque", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este acao destaque."}]
+
+REQUEST_SCHEMA:
+{}

@@ -1,0 +1,14 @@
+TYPE: INTENT
+
+SUMMARY:
+Versão de autorização do usuário autenticado
+
+DESCRIPTION:
+Retorna o número de versão de autorização do usuário autenticado. Usado **exclusivamente** pelo frontend para invalidação de cache — não representa permissões reais e não deve ser usado em decisões de autorização.
+
+A versão começa em `0` quando o usuário ainda não possui um `UserAuthzState` (nenhuma mudança de permissão ocorreu desde a criação da conta). O valor é incrementado automaticamente a cada sync de permissões.
+
+Quando o valor de `authz_version` mudar desde o último check, o frontend deve refazer `GET /me/permissions/`, atualizar o JSON de navegação e invalidar caches locais (React Query / Zustand).
+
+TAGS:
+['1 - Usuários']

@@ -1,0 +1,14 @@
+TYPE: INTENT
+
+SUMMARY:
+Dados do usuário autenticado
+
+DESCRIPTION:
+Retorna os dados do usuário autenticado na sessão atual: profile, roles e apps com acesso.
+
+A autenticação é realizada via **sessão Django** — o cookie `gpp_session_<APP>` (HttpOnly) é enviado automaticamente pelo browser. Em chamadas via JavaScript/Axios/Fetch, o frontend deve usar `withCredentials: true` para garantir o envio do cookie de sessão.
+
+Este endpoint não aceita tokens JWT. A sessão é vinculada ao contexto de aplicação (`app_context`) definido no momento do login.
+
+TAGS:
+['1 - Usuários']

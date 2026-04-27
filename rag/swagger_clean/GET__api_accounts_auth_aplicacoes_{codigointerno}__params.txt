@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "codigointerno", "in": "path", "required": true, "type": "string", "description": "Código interno da aplicação pública (ex: `PORTAL`, `SIGEF`)."}]
+
+REQUEST_SCHEMA:
+{}

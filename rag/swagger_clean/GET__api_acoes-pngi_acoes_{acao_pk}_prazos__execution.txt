@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/
+TOOL: acoes_pngi_acoes_prazos_list
+AUTH_REQUIRED: True

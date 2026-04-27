@@ -1,0 +1,11 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+Eixos temáticos do programa PNGI.
+Somente leitura para todos os usuários autenticados.
+
+TAGS:
+['3 - Ações PNGI']

@@ -1,0 +1,10 @@
+TYPE: INTENT
+
+SUMMARY:
+Dashboard do Portal.
+
+DESCRIPTION:
+Retorna todas as aplicações que o usuário autenticado tem permissão para acessar, retorna também os perfis do usuário para cada aplicação que está cadastrada.
+
+TAGS:
+['2 - Portal']

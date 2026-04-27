@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: PATCH
+PATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/
+TOOL: acoes_pngi_acoes_destaques_partial_update
+AUTH_REQUIRED: True

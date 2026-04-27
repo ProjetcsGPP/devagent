@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "idaplicacao", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este Aplicação."}]
+
+REQUEST_SCHEMA:
+{}

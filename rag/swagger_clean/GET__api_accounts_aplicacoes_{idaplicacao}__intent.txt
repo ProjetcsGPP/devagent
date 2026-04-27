@@ -1,0 +1,18 @@
+TYPE: INTENT
+
+SUMMARY:
+Detalhar aplicação visível ao usuário
+
+DESCRIPTION:
+Retorna os dados de uma aplicação específica visível ao usuário autenticado.
+
+**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+**Permissões:** requer autenticação (`IsAuthenticated`).
+
+**Escopo de visibilidade:**
+- `PORTAL_ADMIN` ou `superuser`: pode consultar qualquer aplicação.
+- usuário comum: pode consultar apenas aplicações nas quais possui `UserRole`.
+
+TAGS:
+['1 - Usuários']

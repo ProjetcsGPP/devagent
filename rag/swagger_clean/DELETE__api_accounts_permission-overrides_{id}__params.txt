@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "id", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este User Permission Override."}]
+
+REQUEST_SCHEMA:
+{}

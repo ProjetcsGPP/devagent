@@ -1,0 +1,18 @@
+TYPE: INTENT
+
+SUMMARY:
+Listar aplicações visíveis ao usuário
+
+DESCRIPTION:
+Retorna as aplicações disponíveis ao usuário autenticado no contexto pós-login.
+
+**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+**Permissões:** requer autenticação (`IsAuthenticated`).
+
+**Escopo de visibilidade:**
+- `PORTAL_ADMIN` ou `superuser`: visualiza todas as aplicações sem restrição.
+- usuário comum: visualiza apenas as aplicações nas quais possui `UserRole`, com filtro adicional para apps não bloqueadas e prontas para produção.
+
+TAGS:
+['1 - Usuários']

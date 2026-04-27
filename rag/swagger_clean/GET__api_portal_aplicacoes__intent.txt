@@ -1,0 +1,12 @@
+TYPE: INTENT
+
+SUMMARY:
+
+
+DESCRIPTION:
+GET /api/portal/aplicacoes/         → lista apps visíveis no portal
+GET /api/portal/aplicacoes/{id}/    → detalhe de uma app
+Requer autenticação.
+
+TAGS:
+['2 - Portal']
