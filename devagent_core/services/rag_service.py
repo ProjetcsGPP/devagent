@@ -40,7 +40,7 @@ class RAGService:
         else:
             snippets = []
 
-            for path, in matches[:3]:
+            for path, *_ in matches[:3]:
                 row = self.storage.fetchone(
                     """
                     SELECT content
@@ -61,6 +61,20 @@ class RAGService:
 
             context = "\n\n".join(snippets)
 
+        prompt = self.build_chat_prompt(
+            message=question,
+            context=context,
+            history=[],
+        )
+
+        answer = self.llm.generate(prompt)
+
+        return {
+            "query": question,
+            "results": matches,
+            "answer": answer or "",
+            "status": "ok",
+        }
 
     def search_context(self, query: str, limit: int = 5) -> str:
         results = self.index.search(query, limit)

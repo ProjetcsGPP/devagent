@@ -1,0 +1,40 @@
+# devagent_core/core/bootstrap.py
+
+from devagent_core.storage.sqlite_storage import SQLiteStorage
+from devagent_core.services.memory_service import MemoryService
+from devagent_core.services.index_service import IndexService
+from devagent_core.services.llm_service import LLMService
+from devagent_core.services.rag_service import RAGService
+from devagent_core.tools.analyze_tool import AnalyzeTool
+from devagent_core.tools.edit_tool import EditTool
+
+
+class Bootstrap:
+    def __init__(self):
+        self.storage = None
+        self.memory = None
+        self.index = None
+        self.llm = None
+        self.rag = None
+        self.analyze_tool = None
+        self.edit_tool = None
+
+    def start(self):
+        self.storage = SQLiteStorage()
+        self.memory = MemoryService(self.storage)
+        self.index = IndexService(self.storage)
+        self.llm = LLMService()
+        self.rag = RAGService(
+            self.index,
+            self.llm,
+            self.storage,
+        )
+
+        self.analyze_tool = AnalyzeTool(self.rag)
+        self.edit_tool = EditTool(self.llm)
+
+        print("\n🧠 DEVAGENT CORE v2 iniciado\n")
+        print("Memory: active")
+        print(f"Index count: {self.index.count()}")
+        print("RAG: active")
+        print("Edit Tool: active")
