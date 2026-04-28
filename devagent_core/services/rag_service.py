@@ -1,122 +1,149 @@
+from typing import List, Dict, Any
+
+
 class RAGService:
-    def __init__(self, index_service, llm_service, storage):
+    def __init__(self, index_service, llm_service, storage, file_tag_repo=None):
         self.index = index_service
         self.llm = llm_service
         self.storage = storage
+        self.file_tag_repo = file_tag_repo
 
-    def build_chat_prompt(
-        self,
-        message: str,
-        context: str,
-        history: list,
-    ) -> str:
-        conversation = ""
+    # -----------------------------
+    # QUERY PRINCIPAL (RAG v2)
+    # -----------------------------
+    def query(self, question: str) -> Dict[str, Any]:
+        # 1. busca textual base
+        matches = self.index.search(question, limit=10) or []
 
-        for item in history[-10:]:
-            conversation += (
-                f"{item['role'].capitalize()}: "
-                f"{item['content']}\n"
+        # 2. fallback seguro
+        if not matches:
+            return {
+                "query": question,
+                "results": [],
+                "answer": "Nenhum contexto relevante encontrado.",
+                "status": "no_context"
+            }
+
+        scored_contexts = []
+
+        # 3. monta contexto com score híbrido
+        for item in matches:
+            path = item[0] if isinstance(item, tuple) else item
+
+            content = self._get_file_content(path)
+
+            if not content:
+                continue
+
+            # score textual base
+            text_score = self._simple_text_score(question, content)
+
+            # score semântico via tags
+            tag_score = self._tag_score(path, question)
+
+            # score final híbrido
+            final_score = (
+                (text_score * 0.5) +
+                (tag_score * 0.5)
             )
 
-        return f"""
-    Você é DevAgent, um especialista em engenharia de software.
+            scored_contexts.append({
+                "path": path,
+                "content": content[:2500],
+                "score": final_score
+            })
 
-    Contexto do projeto:
-    {context}
+        # 4. ordena por relevância
+        scored_contexts.sort(key=lambda x: x["score"], reverse=True)
 
-    Histórico da conversa:
-    {conversation}
+        # 5. pega top contextos
+        top_contexts = scored_contexts[:5]
 
-    Usuário: {message}
+        context_text = self._build_context(top_contexts)
 
-    Resposta:
-    """
-
-    def query(self, question: str):
-        matches = self.index.search(question, limit=5)
-
-        if not matches:
-            context = "Nenhum arquivo relevante encontrado."
-        else:
-            snippets = []
-
-            for path, *_ in matches[:3]:
-                row = self.storage.fetchone(
-                    """
-                    SELECT content
-                    FROM files_index
-                    WHERE path = ?
-                    """,
-                    (path,),
-                )
-
-                if not row:
-                    continue
-
-                content = row[0][:2000]
-
-                snippets.append(
-                    f"### Arquivo: {path}\n{content}"
-                )
-
-            context = "\n\n".join(snippets)
-
-        prompt = self.build_chat_prompt(
-            message=question,
-            context=context,
-            history=[],
-        )
+        # 6. prompt final
+        prompt = self._build_prompt(question, context_text)
 
         answer = self.llm.generate(prompt)
 
         return {
             "query": question,
-            "results": matches,
-            "answer": answer or "",
-            "status": "ok",
+            "results": top_contexts,
+            "answer": answer,
+            "status": "ok"
         }
 
-    def search_context(self, query: str, limit: int = 5) -> str:
-        results = self.index.search(query, limit)
+    # -----------------------------
+    # TAG SCORE (SEMÂNTICO)
+    # -----------------------------
+    def _tag_score(self, file_path: str, question: str) -> float:
+        if not self.file_tag_repo:
+            return 0.0
 
-        if not results:
-            return "Nenhum contexto relevante encontrado."
+        tags = self.file_tag_repo.get_by_file(file_path)
 
-        contexts = []
+        if not tags:
+            return 0.0
 
-        for file_path, *_ in results:
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    contexts.append(
-                        f"\n### Arquivo: {file_path}\n{content[:4000]}"
-                    )
-            except Exception:
-                continue
+        q = question.lower()
 
-        return "\n".join(contexts)
+        score = 0.0
 
-    def chat(self, message: str, history: list) -> str:
-        context = self.search_context(message)
+        for tag in tags:
+            if tag.tag.lower() in q:
+                score += tag.weight * tag.confidence
 
-        prompt = self.build_chat_prompt(
-            message,
-            context,
-            history,
+        return min(score, 1.0)
+
+    # -----------------------------
+    # TEXTO SCORE (HEURÍSTICO SIMPLES)
+    # -----------------------------
+    def _simple_text_score(self, question: str, content: str) -> float:
+        q_words = set(question.lower().split())
+        c_words = set(content.lower().split())
+
+        if not q_words:
+            return 0.0
+
+        overlap = len(q_words.intersection(c_words))
+        return overlap / len(q_words)
+
+    # -----------------------------
+    # FILE CONTENT
+    # -----------------------------
+    def _get_file_content(self, path: str) -> str:
+        row = self.storage.fetchone(
+            """
+            SELECT content
+            FROM files_index
+            WHERE path = ?
+            """,
+            (path,),
         )
 
-        return self.llm.generate(prompt)
+        return row[0] if row else ""
 
-        prompt = f"""
-Você é DevAgent, um arquiteto de software especializado em análise de código.
+    # -----------------------------
+    # CONTEXT BUILDER
+    # -----------------------------
+    def _build_context(self, contexts: List[Dict[str, Any]]) -> str:
+        blocks = []
 
-IMPORTANTE:
-- Responda SOMENTE com base no contexto fornecido.
-- O contexto pertence ao projeto atual do usuário.
-- Se existir uma classe, função ou arquivo com o nome solicitado, explique esse código.
-- Nunca responda com definições genéricas.
-- Nunca explique tecnologias externas, a menos que estejam explicitamente no contexto.
-- Se a informação não estiver no contexto, diga claramente isso.
+        for c in contexts:
+            blocks.append(
+                f"### FILE: {c['path']}\n{c['content']}"
+            )
+
+        return "\n\n".join(blocks)
+
+    # -----------------------------
+    # PROMPT BUILDER
+    # -----------------------------
+    def _build_prompt(self, question: str, context: str) -> str:
+        return f"""
+Você é o DevAgent, um agente de engenharia de software.
+
+Responda com base EXCLUSIVA no contexto abaixo.
 
 ================ CONTEXTO ================
 
@@ -126,16 +153,14 @@ IMPORTANTE:
 
 {question}
 
-==========================================
+=========================================
 
-Resposta técnica, objetiva, detalhada e em português:
+Resposta técnica, objetiva e precisa:
 """
 
-        answer = self.llm.generate(prompt)
-
-        return {
-            "query": question,
-            "results": matches,
-            "answer": answer,
-            "status": "ok",
-        }
+    # -----------------------------
+    # CHAT (mantido compatível)
+    # -----------------------------
+    def chat(self, message: str, history: list) -> str:
+        result = self.query(message)
+        return result["answer"]

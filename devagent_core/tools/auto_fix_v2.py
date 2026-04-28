@@ -17,10 +17,10 @@ class AutoFixV2Result:
 
 
 class AutoFixV2:
-    def __init__(self, llm_service, max_attempts: int = 3):
-        self.test_tool = TestTool()
-        self.edit_tool = EditTool(llm_service)
+    def __init__(self, llm_service, edit_tool, test_tool, max_attempts: int = 3):
         self.llm = llm_service
+        self.edit_tool = edit_tool
+        self.test_tool = test_tool
         self.max_attempts = max_attempts
 
     def execute(self, target: str = ".") -> AutoFixV2Result:
