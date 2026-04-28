@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[{"name": "ideixo", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este eixo."}]
-
-REQUEST_SCHEMA:
-{}

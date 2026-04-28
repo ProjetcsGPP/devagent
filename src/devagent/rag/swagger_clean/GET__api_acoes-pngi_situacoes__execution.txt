@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/acoes-pngi/situacoes/
-TOOL: acoes_pngi_situacoes_list
-AUTH_REQUIRED: True

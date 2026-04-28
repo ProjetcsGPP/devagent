@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/accounts/user-roles/
-TOOL: accounts_user_roles_create
-AUTH_REQUIRED: True

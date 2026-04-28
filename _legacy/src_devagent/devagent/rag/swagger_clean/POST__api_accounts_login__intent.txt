@@ -1,0 +1,14 @@
+TYPE: INTENT
+
+SUMMARY:
+Login via sessão
+
+DESCRIPTION:
+Autentica o usuário e cria uma sessão por aplicação `gpp_session_<app_context>` (ex: `gpp_session_PORTAL`). Requer `username`, `password` e `app_context`.
+
+**Autenticação via cookie HttpOnly:** após o login bem-sucedido, o servidor retorna o header `Set-Cookie: gpp_session_<APP>=<session_key>; HttpOnly; SameSite=Lax`. O frontend **deve** usar `withCredentials: true` (axios) ou `credentials: 'include'` (fetch) em todas as requisições subsequentes para que o browser envie o cookie automaticamente.
+
+O header `X-CSRFToken` é rotacionado via `rotate_token()` a cada login — o frontend deve reler o cookie `csrftoken` e incluir o novo valor no header `X-CSRFToken` nas próximas requisições mutantes (POST/PUT/PATCH/DELETE).
+
+TAGS:
+['0 - Autenticação']

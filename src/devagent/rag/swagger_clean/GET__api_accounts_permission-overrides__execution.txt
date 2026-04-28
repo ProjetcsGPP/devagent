@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/accounts/permission-overrides/
-TOOL: accounts_permission_overrides_list
-AUTH_REQUIRED: True

@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[]
-
-REQUEST_SCHEMA:
-{"id": {"type": "integer", "required": true, "description": null, "example": null, "enum": null, "format": null, "default": null}, "user": {"type": "integer", "required": true, "description": null, "example": null, "enum": null, "format": null, "default": null}, "aplicacao": {"type": "integer", "required": false, "description": null, "example": null, "enum": null, "format": null, "default": null}, "aplicacao_codigo": {"type": "string", "required": true, "description": null, "example": null, "enum": null, "format": null, "default": null}, "role": {"type": "integer", "required": true, "description": null, "example": null, "enum": null, "format": null, "default": null}, "role_codigo": {"type": "string", "required": true, "description": null, "example": null, "enum": null, "format": null, "default": null}}

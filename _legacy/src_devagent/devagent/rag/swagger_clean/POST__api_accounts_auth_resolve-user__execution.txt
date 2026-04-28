@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: POST
+PATH: /api/accounts/auth/resolve-user/
+TOOL: accounts_auth_resolve_user_create
+AUTH_REQUIRED: True

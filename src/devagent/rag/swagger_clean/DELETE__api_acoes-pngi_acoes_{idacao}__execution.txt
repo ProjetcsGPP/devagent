@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: DELETE
-PATH: /api/acoes-pngi/acoes/{idacao}/
-TOOL: acoes_pngi_acoes_destroy
-AUTH_REQUIRED: True

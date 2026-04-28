@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/accounts/auth/aplicacoes/{codigointerno}/
-TOOL: accounts_auth_aplicacoes_retrieve
-AUTH_REQUIRED: True

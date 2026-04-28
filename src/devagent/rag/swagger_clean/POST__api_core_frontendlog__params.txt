@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[]
-
-REQUEST_SCHEMA:
-{"level": {"type": "string", "required": true, "description": null, "example": "error", "enum": ["debug", "info", "warn", "error"], "format": null, "default": null}, "message": {"type": "string", "required": true, "description": null, "example": "TypeError: Cannot read properties of null", "enum": null, "format": null, "default": null}, "context": {"type": "object", "required": false, "description": null, "example": {"page": "/dashboard", "user_agent": "Mozilla/5.0"}, "enum": null, "format": null, "default": null}}

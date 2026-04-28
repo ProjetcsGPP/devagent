@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/portal/aplicacoes/
-TOOL: portal_aplicacoes_list
-AUTH_REQUIRED: True

@@ -1,0 +1,18 @@
+TYPE: INTENT
+
+SUMMARY:
+Listar aplicações públicas
+
+DESCRIPTION:
+Retorna a lista de aplicações públicas disponíveis para seleção na tela de login.
+
+**Acesso:** endpoint público (`AllowAny`).
+**Autenticação:** não requer autenticação.
+**Sessão:** não usa cookie de sessão.
+
+**Uso principal:** popular o seletor de aplicações (`app_context`) no frontend antes do login.
+
+**Filtro aplicado:** retorna apenas aplicações ativas e visíveis, ou seja, não bloqueadas e prontas para produção.
+
+TAGS:
+['5 - Utilitários']

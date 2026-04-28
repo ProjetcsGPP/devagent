@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/accounts/logout/
-TOOL: accounts_logout_session
-AUTH_REQUIRED: True

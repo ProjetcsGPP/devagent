@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: DELETE
-PATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/
-TOOL: acoes_pngi_acoes_destaques_destroy
-AUTH_REQUIRED: True

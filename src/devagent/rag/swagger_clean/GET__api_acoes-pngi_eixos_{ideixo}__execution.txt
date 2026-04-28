@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/acoes-pngi/eixos/{ideixo}/
-TOOL: acoes_pngi_eixos_retrieve
-AUTH_REQUIRED: True

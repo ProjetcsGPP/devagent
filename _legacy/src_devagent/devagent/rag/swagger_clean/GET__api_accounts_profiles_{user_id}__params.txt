@@ -1,0 +1,7 @@
+TYPE: PARAMETERS
+
+PARAMETERS:
+[{"name": "user_id", "in": "path", "required": true, "type": "integer", "description": "Um valor único que identifica este User Profile."}]
+
+REQUEST_SCHEMA:
+{}

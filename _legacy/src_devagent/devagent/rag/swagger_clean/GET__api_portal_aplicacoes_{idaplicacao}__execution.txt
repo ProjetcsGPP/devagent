@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/portal/aplicacoes/{idaplicacao}/
+TOOL: portal_aplicacoes_retrieve
+AUTH_REQUIRED: True

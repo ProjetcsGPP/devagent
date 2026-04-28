@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/acoes/{acao_pk}/prazos/{idacaoprazo}/
+TOOL: acoes_pngi_acoes_prazos_retrieve
+AUTH_REQUIRED: True

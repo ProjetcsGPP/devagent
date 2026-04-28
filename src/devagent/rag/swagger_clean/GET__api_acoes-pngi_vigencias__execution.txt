@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/acoes-pngi/vigencias/
-TOOL: acoes_pngi_vigencias_list
-AUTH_REQUIRED: True

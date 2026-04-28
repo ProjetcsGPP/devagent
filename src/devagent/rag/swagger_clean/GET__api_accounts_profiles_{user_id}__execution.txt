@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/accounts/profiles/{user_id}/
-TOOL: accounts_profiles_retrieve
-AUTH_REQUIRED: True

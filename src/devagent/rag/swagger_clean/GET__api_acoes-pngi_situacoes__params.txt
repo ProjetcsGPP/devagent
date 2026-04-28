@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[{"name": "page", "in": "query", "required": false, "type": "integer", "description": "Um número de página dentro do conjunto de resultados paginado."}, {"name": "page_size", "in": "query", "required": false, "type": "integer", "description": "Número de resultados a serem retornados por página."}]
-
-REQUEST_SCHEMA:
-{}

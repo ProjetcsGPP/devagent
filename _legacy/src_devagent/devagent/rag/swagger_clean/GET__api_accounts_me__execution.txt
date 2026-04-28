@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/accounts/me/
+TOOL: accounts_me_retrieve
+AUTH_REQUIRED: True

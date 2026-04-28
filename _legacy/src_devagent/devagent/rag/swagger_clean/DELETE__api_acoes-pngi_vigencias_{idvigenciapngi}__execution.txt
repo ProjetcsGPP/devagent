@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: DELETE
+PATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/
+TOOL: acoes_pngi_vigencias_destroy
+AUTH_REQUIRED: True

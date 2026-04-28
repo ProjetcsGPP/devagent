@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: PUT
+PATH: /api/accounts/permission-overrides/{id}/
+TOOL: accounts_permission_overrides_update
+AUTH_REQUIRED: True

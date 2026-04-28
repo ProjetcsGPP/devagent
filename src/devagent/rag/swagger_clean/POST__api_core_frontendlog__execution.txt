@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/core/frontendlog/
-TOOL: core_frontendlog_create
-AUTH_REQUIRED: True

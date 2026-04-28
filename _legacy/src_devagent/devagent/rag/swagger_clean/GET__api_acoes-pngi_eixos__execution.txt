@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/acoes-pngi/eixos/
+TOOL: acoes_pngi_eixos_list
+AUTH_REQUIRED: True

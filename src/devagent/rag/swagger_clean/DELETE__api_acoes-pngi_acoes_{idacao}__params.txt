@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[{"name": "idacao", "in": "path", "required": true, "type": "integer", "description": "Um valor inteiro único que identifica este acoes."}]
-
-REQUEST_SCHEMA:
-{}

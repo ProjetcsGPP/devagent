@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/accounts/aplicacoes/
-TOOL: accounts_aplicacoes_list
-AUTH_REQUIRED: True

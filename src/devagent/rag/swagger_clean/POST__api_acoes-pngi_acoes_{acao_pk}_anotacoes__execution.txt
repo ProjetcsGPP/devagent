@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/acoes-pngi/acoes/{acao_pk}/anotacoes/
-TOOL: acoes_pngi_acoes_anotacoes_create
-AUTH_REQUIRED: True

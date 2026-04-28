@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/accounts/user-roles/{id}/
-TOOL: accounts_user_roles_retrieve
-AUTH_REQUIRED: True

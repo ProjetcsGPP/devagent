@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/accounts/logout/{app_slug}/
-TOOL: accounts_logout_app
-AUTH_REQUIRED: True

@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/accounts/users/create-with-role/
-TOOL: accounts_users_create_with_role_create
-AUTH_REQUIRED: True

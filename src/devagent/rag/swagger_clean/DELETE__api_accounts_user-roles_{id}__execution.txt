@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: DELETE
-PATH: /api/accounts/user-roles/{id}/
-TOOL: accounts_user_roles_destroy
-AUTH_REQUIRED: True

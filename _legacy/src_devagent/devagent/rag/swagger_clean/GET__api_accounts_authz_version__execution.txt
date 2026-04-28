@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: GET
+PATH: /api/accounts/authz/version/
+TOOL: accounts_authz_version_retrieve
+AUTH_REQUIRED: True

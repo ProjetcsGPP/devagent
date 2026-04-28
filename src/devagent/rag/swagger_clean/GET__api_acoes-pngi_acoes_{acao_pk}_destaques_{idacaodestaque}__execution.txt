@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/{idacaodestaque}/
-TOOL: acoes_pngi_acoes_destaques_retrieve
-AUTH_REQUIRED: True

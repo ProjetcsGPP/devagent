@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: PATCH
-PATH: /api/acoes-pngi/acoes/{idacao}/
-TOOL: acoes_pngi_acoes_partial_update
-AUTH_REQUIRED: True

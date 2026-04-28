@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: GET
-PATH: /api/portal/dashboard/
-TOOL: portal_dashboard_retrieve
-AUTH_REQUIRED: True

@@ -1,0 +1,16 @@
+TYPE: INTENT
+
+SUMMARY:
+Atualizar override de permissão
+
+DESCRIPTION:
+Atualiza completamente um `UserPermissionOverride` existente.
+
+**Autenticação:** requer sessão ativa via cookie HttpOnly `gpp_session_<APP>` (ex: `gpp_session_PORTAL`). O frontend deve enviar todas as requisições com `withCredentials: true`.
+
+**Permissões:** acesso exclusivo a usuários com perfil `PORTAL_ADMIN`.
+
+**Impacto funcional:** a atualização altera as permissões efetivas do usuário alvo e dispara `sync_user_permissions(user)` imediatamente após a mutação.
+
+TAGS:
+['1 - Usuários']

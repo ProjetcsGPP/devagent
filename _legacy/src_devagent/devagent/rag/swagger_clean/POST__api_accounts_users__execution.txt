@@ -1,0 +1,6 @@
+TYPE: EXECUTION
+
+METHOD: POST
+PATH: /api/accounts/users/
+TOOL: accounts_users_create
+AUTH_REQUIRED: True

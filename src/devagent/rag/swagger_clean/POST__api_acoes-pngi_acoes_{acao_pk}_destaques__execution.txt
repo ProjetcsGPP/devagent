@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: POST
-PATH: /api/acoes-pngi/acoes/{acao_pk}/destaques/
-TOOL: acoes_pngi_acoes_destaques_create
-AUTH_REQUIRED: True

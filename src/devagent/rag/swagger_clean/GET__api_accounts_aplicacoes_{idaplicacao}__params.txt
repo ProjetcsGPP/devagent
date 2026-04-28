@@ -1,7 +1,0 @@
-TYPE: PARAMETERS
-
-PARAMETERS:
-[{"name": "idaplicacao", "in": "path", "required": true, "type": "integer", "description": "ID da aplicação a ser consultada."}]
-
-REQUEST_SCHEMA:
-{}

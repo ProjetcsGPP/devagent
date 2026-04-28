@@ -1,6 +1,0 @@
-TYPE: EXECUTION
-
-METHOD: PATCH
-PATH: /api/acoes-pngi/vigencias/{idvigenciapngi}/
-TOOL: acoes_pngi_vigencias_partial_update
-AUTH_REQUIRED: True
