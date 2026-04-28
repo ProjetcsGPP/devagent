@@ -1,9 +1,9 @@
 class MILKernel:
-    def __init__(self, storage, file_tags, memory_store):
+    def __init__(self, storage, file_tags, memory_service):
 
-        self.storage = storage
-        self.file_tags = file_tags
-        self.memory = memory_store
+            self.storage = storage
+            self.file_tags = file_tags
+            self.memory = memory_service
 
     # =====================================================
     # CONTEXT ENGINE (FINAL)

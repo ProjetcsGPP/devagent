@@ -1,5 +1,9 @@
 # devagent_core/services/memory_service.py
 
+import json
+import time
+
+
 class MemoryService:
     def __init__(self, storage):
         self.storage = storage
@@ -16,3 +20,19 @@ class MemoryService:
             (key,)
         )
         return r[0] if r else None
+
+    # =========================
+    # EVENT LOG (NOVA MEMÓRIA)
+    # =========================
+    def record_event(self, event: dict):
+        self.storage.execute(
+            """
+            INSERT INTO memory_store (type, data, timestamp)
+            VALUES (?, ?, ?)
+            """,
+            (
+                event.get("type"),
+                json.dumps(event),
+                time.time()
+            )
+        )

@@ -16,8 +16,13 @@ class DevAgentBrainV3:
         self.strategy_score = defaultdict(float)
         self.execution_history = []
 
-        self.memory_store = bootstrap.memory
+        self.memory = bootstrap.memory
         self.memory_ai = bootstrap.memory_intelligence
+
+
+    def _memory_event(self, event: dict):
+        self.memory.record_event(event)
+
 
     # =========================================================
     # ENTRY POINT
@@ -50,7 +55,7 @@ class DevAgentBrainV3:
                 self._learn(intent, result, validation)
                 self._learn_from_success(intent, strategy, plan)
 
-                self.memory_store.record({
+                self._memory_event({
                     "type": "execution_success",
                     "intent": intent,
                     "strategy": strategy,
@@ -75,7 +80,7 @@ class DevAgentBrainV3:
 
         strategy_final = strategy if 'strategy' in locals() else "unknown"
 
-        self.memory_store.record({
+        self._memory_event({
             "type": "execution_failure",
             "intent": intent,
             "strategy": strategy_final,
@@ -97,7 +102,7 @@ class DevAgentBrainV3:
     
     def _learn_from_success(self, intent, strategy, plan):
 
-        self.memory_store.record({
+        self._memory_event({
             "type": "success_pattern",
             "intent": intent,
             "strategy": strategy,
@@ -227,8 +232,8 @@ ERRO ANTERIOR:
     # =========================================================
     def _record_execution(self, intent, plan, validation, strategy):
 
-        self.memory_store.record({
-            "time": time.time(),
+        self._memory_event({
+            "timestamp": time.time(),
             "intent": intent,
             "plan": plan,
             "strategy": strategy,

@@ -6,8 +6,8 @@ class MemoryIntelligence:
     Constrói padrões a partir da memória de execução.
     """
 
-    def __init__(self, memory_store):
-        self.memory = memory_store
+    def __init__(self, memory_service):
+        self.memory = memory_service
 
     # =========================================================
     # ANALYZE PATTERNS
@@ -23,7 +23,7 @@ class MemoryIntelligence:
 
         for e in self.memory.all():
 
-            key = e.get("error_type", "unknown")
+            key = e.get("type", "unknown")
 
             p = patterns[key]
 
@@ -58,3 +58,28 @@ class MemoryIntelligence:
             return None
 
         return max(strategies.items(), key=lambda x: x[1])[0]
+    
+    def most_common_error(self, intent_type: str):
+
+        patterns = self.analyze()
+        p = patterns.get(intent_type)
+
+        if not p:
+            return None
+
+        # pega apenas eventos de falha
+        failures = [
+            e for e in self.memory.all()
+            if e.get("type") == "execution_failure"
+        ]
+
+        errors = defaultdict(int)
+
+        for f in failures:
+            err = f.get("last_error") or "unknown"
+            errors[err] += 1
+
+        if not errors:
+            return None
+
+        return max(errors.items(), key=lambda x: x[1])[0]
