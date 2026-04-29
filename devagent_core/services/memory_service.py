@@ -33,6 +33,6 @@ class MemoryService:
             (
                 event.get("type"),
                 json.dumps(event),
-                time.time()
+                event.get("timestamp", time.time())
             )
         )

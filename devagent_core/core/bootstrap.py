@@ -13,7 +13,7 @@ from devagent_core.tools.auto_fix_v2 import AutoFixV2
 
 from devagent_core.core.brain_v3 import DevAgentBrainV3
 
-from devagent_core.memory.mil_final import MIL   # ✅ FIX CRÍTICO
+from devagent_core.memory.mil_final import MIL  
 from devagent_core.repositories.file_tag_repository import FileTagRepository
 
 import logging
@@ -36,7 +36,7 @@ class Bootstrap:
         self.auto_fix_v2 = None
 
         self.file_tags = None
-        self.memory_intelligence = None
+        self.mil = None
         self.brain = None
 
     def start(self):
@@ -86,7 +86,7 @@ class Bootstrap:
             # =========================
             # MIL (MEMÓRIA INTELIGENTE)
             # =========================
-            self.memory_intelligence = MIL(
+            self.mil = MIL(
                 self.storage,
                 self.file_tags
             )

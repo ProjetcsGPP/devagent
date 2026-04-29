@@ -57,10 +57,10 @@ class DevAgentBrainV3:
 
                 self._memory_event({
                     "type": "execution_success",
+                    "success": True,
                     "intent": intent,
                     "strategy": strategy,
                     "plan": plan,
-                    "success": True,
                     "timestamp": time.time()
                 })
 
@@ -82,9 +82,9 @@ class DevAgentBrainV3:
 
         self._memory_event({
             "type": "execution_failure",
+            "success": False,
             "intent": intent,
             "strategy": strategy_final,
-            "success": False,
             "last_error": last_error,
             "timestamp": time.time()
         })            
@@ -104,6 +104,7 @@ class DevAgentBrainV3:
 
         self._memory_event({
             "type": "success_pattern",
+            "success": True,
             "intent": intent,
             "strategy": strategy,
             "plan": plan,
@@ -233,11 +234,12 @@ ERRO ANTERIOR:
     def _record_execution(self, intent, plan, validation, strategy):
 
         self._memory_event({
+            "type": "execution",
             "timestamp": time.time(),
+            "success": validation["success"],
             "intent": intent,
             "plan": plan,
             "strategy": strategy,
-            "success": validation["success"],
         })
 
     # =========================================================

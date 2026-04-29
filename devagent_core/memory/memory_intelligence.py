@@ -13,18 +13,17 @@ class MemoryIntelligence:
     # ANALYZE PATTERNS
     # =========================================================
     def analyze(self):
-
         patterns = defaultdict(lambda: {
             "count": 0,
             "success": 0,
             "fail": 0,
             "strategies": defaultdict(int),
+            "errors": defaultdict(int),
         })
 
         for e in self.memory.all():
 
             key = e.get("type", "unknown")
-
             p = patterns[key]
 
             p["count"] += 1
@@ -38,7 +37,9 @@ class MemoryIntelligence:
             if strategy:
                 p["strategies"][strategy] += 1
 
-        return patterns
+            err = e.get("last_error")
+            if err:
+                p["errors"][err] += 1
 
     # =========================================================
     # BEST STRATEGY FOR ERROR TYPE
