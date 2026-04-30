@@ -7,7 +7,7 @@ class DevAgentCLI:
         self.chat_session = ChatSession(bootstrap)
 
     def start(self):
-        print("\n🧠 DevAgent pronto (Brain v2 ativo)\n")
+        print("\n🧠 DevAgent pronto (Brain v3 + MIL ativo)\n")
         print("Digite 'exit' para sair.\n")
 
         while True:
@@ -20,7 +20,8 @@ class DevAgentCLI:
             if not user_input:
                 continue
 
-            if user_input.lower() in ["exit", "quit"]:
+            if user_input.lower() in {"exit", "quit"}:
+                print("Encerrando DevAgent...")
                 break
 
             self.handle(user_input)
@@ -30,31 +31,56 @@ class DevAgentCLI:
     # =========================================================
     def handle(self, user_input: str):
         try:
-            result = self.bootstrap.brain.handle(user_input)
-
+            result = self.chat_session.handle(user_input)
             self._render(result)
 
         except Exception as e:
-            print(f"\n❌ Erro no Brain: {e}\n")
+            print(f"\n❌ Erro no DevAgent: {e}\n")
 
     # =========================================================
     # OUTPUT ONLY
     # =========================================================
     def _render(self, result: dict):
+        success = result.get("success", False)
 
-        if result.get("success"):
+        if success:
             print("\n✅ EXECUÇÃO CONCLUÍDA")
-
         else:
-            print("\n❌ FALHA NA EXECUÇÃO")
+            print("\n❌ EXECUÇÃO FALHOU")
 
-        print(f"\nTentativas: {result.get('attempts', 1)}")
+        print(f"\nEstratégia: {result.get('strategy', 'unknown')}")
+        print(f"Tentativas: {result.get('attempts', 1)}")
 
-        if result.get("validation"):
-            print(f"Validação: {result['validation']}")
+        validation = result.get("validation")
+        if validation:
+            print(f"Erros detectados: {validation.get('errors', 0)}")
+
+        if result.get("output_file"):
+            print("\n=== ARQUIVO GERADO ===")
+            print(result["output_file"])
+
+        if result.get("generated_code"):
+            print("\n=== CÓDIGO ===")
+            print(result["generated_code"])
+
+        response = result.get("response")
+
+        if not response:
+            response = result.get("generated_code")
+        if not response:
+            response = result.get("output_file")
+        if not response:
+            response = result.get("results")
+
+        if response:
+            print("\n=== RESPOSTA ===")
+            print(response)
+        else:
+            print("\n=== RESPOSTA ===")
+            print("Nenhuma resposta gerada pelo sistema.")
 
         if result.get("last_error"):
-            print("\n=== ERRO FINAL ===")
+            print("\n=== ÚLTIMO ERRO ===")
             print(result["last_error"])
 
         print()

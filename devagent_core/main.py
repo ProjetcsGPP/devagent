@@ -3,8 +3,7 @@ from devagent_core.interfaces.cli import DevAgentCLI
 
 
 def main():
-    bootstrap = Bootstrap()
-    bootstrap.start()
+    bootstrap = Bootstrap().start()
 
     cli = DevAgentCLI(bootstrap)
     cli.start()

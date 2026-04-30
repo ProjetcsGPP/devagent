@@ -13,10 +13,10 @@ class IndexServiceV2_1:
     - persiste via FileTagRepository (CORRETO)
     """
 
-    def __init__(self, storage, llm_service, file_tag_repository):
+    def __init__(self, storage, llm_service, file_tag_service):
         self.storage = storage
         self.llm = llm_service
-        self.tags = file_tag_repository
+        self.tags = file_tag_service
 
     # =========================================================
     # ENTRY POINT
@@ -180,3 +180,22 @@ CONTEÚDO:
                 return f.read()
         except Exception:
             return None
+
+
+    # =========================================================
+    # SYSTEM ENTRY POINT (BOOTSTRAP INDEXING)
+    # =========================================================
+    def run(self, base_directory: str):
+        """
+        Entry point obrigatório para inicialização do sistema.
+
+        Responsabilidade:
+        - disparar indexação completa do projeto
+        - alimentar files_index
+        - garantir RAG funcional no startup
+        """
+
+        if not base_directory:
+            return 0
+
+        return self.index_directory(base_directory)

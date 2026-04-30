@@ -1,12 +1,13 @@
 class MILKernel:
-    def __init__(self, storage, file_tags, memory_service):
+    def __init__(self, storage, file_tags, memory_service, query_service=None):
 
-            self.storage = storage
-            self.file_tags = file_tags
-            self.memory = memory_service
+        self.storage = storage
+        self.file_tags = file_tags
+        self.memory = memory_service
+        self.query = query_service
 
     # =====================================================
-    # CONTEXT ENGINE (FINAL)
+    # CONTEXT ENGINE
     # =====================================================
     def build_context(self, query, execution_history):
 
@@ -16,16 +17,14 @@ class MILKernel:
 
         exec_scores = self._execution_bias(execution_history)
 
-        merged = self._merge_and_rank(
+        return self._merge_and_rank(
             rag_results,
             tag_scores,
             exec_scores
         )
 
-        return merged
-
     # =====================================================
-    # TAG SCORING
+    # TAG SCORING (CORRIGIDO)
     # =====================================================
     def _tag_rank(self, query):
 
@@ -35,23 +34,22 @@ class MILKernel:
 
         for tag in tags:
 
-            files = self.file_tags.search_by_tag(tag)
+            files = self.query.search_file_tags(tag) if self.query else []
 
             for f in files:
 
-                path = f.file_path
+                path = f[0]
+                weight = f[2]
+                confidence = f[3]
 
-                score = (
-                    f.weight *
-                    f.confidence
-                )
+                score = weight * confidence
 
                 scores[path] = scores.get(path, 0) + score
 
         return scores
 
     # =====================================================
-    # EXECUTION BIAS (Brain learning)
+    # EXECUTION BIAS
     # =====================================================
     def _execution_bias(self, history):
 
@@ -75,7 +73,7 @@ class MILKernel:
         return self.storage.search(query)
 
     # =====================================================
-    # MERGE ENGINE (CORE INTELLIGENCE)
+    # MERGE ENGINE
     # =====================================================
     def _merge_and_rank(self, rag, tags, execs):
 
@@ -108,6 +106,9 @@ class MILKernel:
             reverse=True
         )
 
+    # =====================================================
+    # LOAD
+    # =====================================================
     def _load(self, path):
         row = self.storage.fetchone(
             "SELECT content FROM files_index WHERE path = ?",

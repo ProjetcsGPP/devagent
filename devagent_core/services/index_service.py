@@ -5,154 +5,145 @@ from typing import List
 from devagent_core.models.file_tag import FileTag
 
 
-class IndexService:
-    def __init__(self, storage, file_tag_repo=None, llm=None):
+class IndexServiceV2_1:
+    def __init__(self, storage, llm_service, file_tag_service):
         self.storage = storage
-        self.file_tag_repo = file_tag_repo
-        self.llm = llm  # 🔥 novo: LLM opcional
+        self.llm = llm_service
+        self.tags = file_tag_service
 
-    # -------------------------
-    # INDEX FILE
-    # -------------------------
-    def index_file(self, file_path: str):
-        path = Path(file_path).resolve()
+    # =====================================================
+    def index_file(self, path: str):
 
-        if not path.exists() or not path.is_file():
-            raise FileNotFoundError(file_path)
+        content = self._read_file(path)
 
-        content = path.read_text(encoding="utf-8", errors="ignore")
+        if not content:
+            return 0
 
-        # salva conteúdo
-        self.storage.execute("""
-            INSERT OR REPLACE INTO files_index (path, content)
-            VALUES (?, ?)
-        """, (str(path), content))
+        self._store_file_index(path, content)
 
-        # gera tags v2.1 (LLM + fallback)
-        tags = self._generate_tags_v2_1(str(path), content)
+        tags = self._generate_tags(path, content)
 
-        if self.file_tag_repo:
-            for tag in tags:
-                self.file_tag_repo.add(tag)
+        self._store_tags(path, tags)
 
         return len(tags)
 
-    # -------------------------
-    # INDEX DIRECTORY
-    # -------------------------
+    # =====================================================
     def index_directory(self, directory: str):
+
         count = 0
 
         for root, _, files in os.walk(directory):
-            for file in files:
-                if file.endswith(".py"):
-                    self.index_file(os.path.join(root, file))
-                    count += 1
+            for f in files:
+                if f.endswith(".py"):
+                    count += self.index_file(os.path.join(root, f))
 
         return count
 
-    # =========================================================
-    # 🧠 TAG ENGINE v2.1 (LLM + FALLBACK)
-    # =========================================================
-    def _generate_tags_v2_1(self, file_path: str, content: str) -> List[FileTag]:
+    # =====================================================
+    def _store_file_index(self, path: str, content: str):
 
-        # 1. tenta LLM primeiro
-        if self.llm:
-            llm_tags = self._llm_generate_tags(file_path, content)
-            if llm_tags:
-                return llm_tags
+        self.storage.execute(
+            """
+            INSERT OR REPLACE INTO files_index (path, content)
+            VALUES (?, ?)
+            """,
+            (path, content),
+        )
 
-        # 2. fallback heurístico
-        return self._heuristic_tags(file_path, content)
+    # =====================================================
+    def _generate_tags(self, path: str, content: str) -> List[FileTag]:
 
-    # -------------------------
-    # LLM TAG GENERATION
-    # -------------------------
-    def _llm_generate_tags(self, file_path: str, content: str) -> List[FileTag]:
-        try:
-            prompt = f"""
-Você é um sistema de análise de código.
+        tags = self._llm_tags(path, content)
 
-Analise o arquivo abaixo e gere tags semânticas.
+        if not tags:
+            tags = self._heuristic_tags(path, content)
 
-REGRAS:
-- responda APENAS em JSON válido
-- no máximo 8 tags
-- cada tag deve ter:
-  - tag
-  - tag_type (context | domain | intent | error | fix | execution)
-  - weight (0.0 a 1.0)
-  - confidence (0.0 a 1.0)
+        return tags
 
-ARQUIVO:
-{file_path}
+    # =====================================================
+    def _llm_tags(self, path: str, content: str):
 
-CÓDIGO:
-{content[:4000]}
+        prompt = f"""
+Gere tags para este arquivo.
 
-FORMATO:
+RETORNE JSON:
+
 [
   {{
-    "tag": "...",
-    "tag_type": "...",
-    "weight": 1.0,
+    "tag": "api",
+    "tag_type": "architecture",
+    "weight": 2.0,
     "confidence": 0.9
   }}
 ]
+
+ARQUIVO:
+{path}
+
+CONTEÚDO:
+{content[:4000]}
 """
 
-            result = self.llm.generate(prompt)
+        try:
+            data = self.llm.generate_json(prompt)
 
-            data = json.loads(result)
+            if not isinstance(data, list):
+                return []
 
-            tags = []
-
-            for item in data:
-                tags.append(
-                    FileTag(
-                        file_path=file_path,
-                        tag=item.get("tag"),
-                        tag_type=item.get("tag_type", "generic"),
-                        weight=float(item.get("weight", 1.0)),
-                        confidence=float(item.get("confidence", 0.5)),
-                        source="llm"
-                    )
+            return [
+                FileTag(
+                    file_path=path,
+                    tag=item.get("tag"),
+                    tag_type=item.get("tag_type", "generic"),
+                    weight=float(item.get("weight", 1.0)),
+                    confidence=float(item.get("confidence", 0.5)),
+                    source="llm"
                 )
-
-            return tags
+                for item in data if isinstance(item, dict)
+            ]
 
         except Exception:
             return []
 
-    # -------------------------
-    # FALLBACK HEURÍSTICO
-    # -------------------------
-    def _heuristic_tags(self, file_path: str, content: str) -> List[FileTag]:
-        tags: List[FileTag] = []
-        lower = content.lower()
+    # =====================================================
+    def _heuristic_tags(self, path: str, content: str) -> List[FileTag]:
 
-        if "bootstrap" in lower:
-            tags.append(FileTag(file_path, "bootstrap", "context", 1.0, 0.9, "heuristic"))
+        text = (path + content).lower()
+        tags = []
 
-        if "rag" in lower:
-            tags.append(FileTag(file_path, "rag", "domain", 1.0, 0.95, "heuristic"))
+        def add(tag, tag_type="heuristic", weight=1.0, confidence=0.6):
+            tags.append(FileTag(
+                file_path=path,
+                tag=tag,
+                tag_type=tag_type,
+                weight=weight,
+                confidence=confidence,
+                source="heuristic",
+            ))
 
-        if "llm" in lower or "ollama" in lower:
-            tags.append(FileTag(file_path, "llm", "domain", 1.0, 0.9, "heuristic"))
+        if "test" in text:
+            add("testing", "quality", 2.0)
 
-        if "subprocess" in lower:
-            tags.append(FileTag(file_path, "execution", "intent", 1.0, 0.9, "heuristic"))
+        if "api" in text:
+            add("api", "architecture", 2.0)
 
-        if "test" in lower:
-            tags.append(FileTag(file_path, "test", "domain", 1.0, 0.9, "heuristic"))
-
-        if "error" in lower or "exception" in lower:
-            tags.append(FileTag(file_path, "error_handling", "context", 0.8, 0.85, "heuristic"))
-
-        if "class " in lower:
-            tags.append(FileTag(file_path, "oop", "context", 0.7, 0.7, "heuristic"))
-
-        if not tags:
-            tags.append(FileTag(file_path, "general", "generic", 0.3, 0.5, "heuristic"))
+        if "sql" in text:
+            add("database", "data", 2.0)
 
         return tags
+
+    # =====================================================
+    def _store_tags(self, path: str, tags: List[FileTag]):
+
+        self.tags.delete_by_file(path)
+
+        for tag in tags:
+            tag.file_path = path
+            self.tags.add(tag)
+
+    # =====================================================
+    def _read_file(self, path: str):
+        try:
+            return Path(path).read_text(encoding="utf-8")
+        except Exception:
+            return None

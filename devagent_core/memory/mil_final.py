@@ -1,159 +1,222 @@
 from collections import defaultdict
-from typing import List, Dict, Any
-import time
+from typing import Dict
+import json
+from devagent_core.contracts.event_contract import EventContractV1
 
 
 class MIL:
     """
-    Memory Intelligence Layer FINAL
+    Memory Intelligence Layer (CLEAN FINAL VERSION)
 
-    Responsabilidade:
-    - rankear contexto
-    - aprender com execução
-    - evitar loops
-    - evoluir tags e relevância
+    Regras:
+    - Sem SQL direto
+    - Tudo via repositories / QueryService
+    - Sem lógica duplicada de estratégia
+    - Sem mistura Row/dict fora do storage
     """
 
-    def __init__(self, storage, file_tags_repo):
+    def __init__(
+        self,
+        storage,
+        strategy_repository,
+        query_service,
+        file_tag_service,
+    ):
         self.storage = storage
-        self.file_tags = file_tags_repo
+        self.strategy_repository = strategy_repository
+        self.query = query_service
+        self.file_tag_service = file_tag_service
 
-        self.tag_score = defaultdict(float)
         self.error_frequency = defaultdict(int)
-        self.strategy_score = defaultdict(float)
 
     # =========================================================
-    # PUBLIC API
+    # STRATEGY SCORING (SAFE)
     # =========================================================
+    def _strategy_score(self, strategy: str) -> float:
+        data = self.strategy_repository.load_all().get(strategy, {})
 
+        if not data:
+            return 0.0
+
+        success = data.get("success_count") or 0
+        failure = data.get("failure_count") or 0
+
+        return success - (failure * 0.5)
+
+    def _rank_strategies(self) -> Dict[str, float]:
+        all_strategies = self.strategy_repository.load_all()
+
+        scores = {}
+
+        for name in all_strategies:
+            scores[name] = self._strategy_score(name)
+
+        return scores
+
+    # =========================================================
+    # BEST STRATEGY
+    # =========================================================
+    def best_strategy(self, intent: str = None) -> str:
+        scores = self._rank_strategies()
+
+        return max(scores, key=scores.get) if scores else "default_plan"
+
+    # =========================================================
+    # EVENT ENTRY
+    # =========================================================
+    def process_event(self, event: EventContractV1):
+        self.learn_from_event(event)
+        self._update_strategy(event)
+
+    # =========================================================
+    # STRATEGY UPDATE
+    # =========================================================
+    def _update_strategy(self, event: EventContractV1):
+        strategy = str(event.strategy or "default_plan")
+
+        if event.success:
+            self.strategy_repository.register_success(strategy)
+        else:
+            self.strategy_repository.register_failure(strategy)
+
+            if event.error:
+                intent = str(event.intent or "unknown")
+                self.error_frequency[(intent, event.error)] += 1
+
+    # =========================================================
+    # CONTEXT BUILDER
+    # =========================================================
     def build_context(self, query: str, brain=None):
-
         rag = self._rag(query)
         tag_scores = self._tags(query)
         exec_scores = self._execution(query)
         loop_penalty = self._loop_detection(query)
-        strategy_boost = self._brain(brain)
+        brain_scores = self._brain(brain)
 
         return self._merge(
             rag,
             tag_scores,
             exec_scores,
             loop_penalty,
-            strategy_boost
+            brain_scores,
         )
 
     # =========================================================
     # RAG
     # =========================================================
-
     def _rag(self, query: str):
-        return self.storage.fetchall("""
-            SELECT path, content
-            FROM files_index
-            WHERE content LIKE ?
-            LIMIT 20
-        """, (f"%{query}%",))
+
+        rows = self.query.search_files(query)
+
+        print("\n===== RAG DEBUG =====")
+        print("QUERY:", query)
+        print("RESULTS:", len(rows))
+
+        for r in rows[:10]:
+            print("\nPATH:", r.get("path"))
+            print("CONTENT SAMPLE:", (r.get("content") or "")[:200])
+
+        print("=====================\n")
+
+        return rows
 
     # =========================================================
-    # TAG SYSTEM (peso semântico)
+    # TAGS (SAFE UNPACK)
     # =========================================================
-
     def _tags(self, query: str):
-
-        rows = self.storage.fetchall("""
-            SELECT file_path, tag, weight, confidence
-            FROM file_tags
-        """)
-
         scores = defaultdict(float)
 
-        for path, tag, weight, confidence in rows:
+        for word in query.lower().split():
+            tags = self.query.search_file_tags(word)
 
-            if tag.lower() in query.lower():
-                scores[path] += weight * confidence
+            for r in tags:
+                file_path = r["file_path"]
+                tag = r["tag"]
+                weight = r["weight"]
+                confidence = r["confidence"]
+
+                scores[file_path] += weight * confidence
 
         return scores
 
     # =========================================================
-    # EXECUTION MEMORY (aprendizado real)
+    # EXECUTION MEMORY (SAFE)
     # =========================================================
-
     def _execution(self, query: str):
 
-        rows = self.storage.fetchall("""
-            SELECT intent, success, error_type
-            FROM execution_memory
-            ORDER BY id DESC
-            LIMIT 300
-        """)
-
+        rows = self.query.get_execution_events()
         scores = defaultdict(float)
 
-        for intent, success, error in rows:
+        for row in rows:
 
-            if query.lower() in str(intent).lower():
+            raw = row.get("data") if isinstance(row, dict) else row[0]
 
-                score = 1.5 if success else -2.0
+            if not raw:
+                continue
 
-                scores[str(intent)] += score
+            try:
+                event = json.loads(raw) if isinstance(raw, str) else raw
+            except Exception:
+                continue
 
+            intent = str(event.get("intent", ""))
+
+            if query.lower() in intent.lower():
+                score = 1.5 if event.get("success") else -2.0
+                scores[intent] += score
+
+                error = event.get("error")
                 if error:
                     self.error_frequency[(intent, error)] += 1
 
         return scores
 
     # =========================================================
-    # LOOP DETECTION (ANTI-REPETIÇÃO REAL)
+    # LOOP DETECTION
     # =========================================================
-
     def _loop_detection(self, query: str):
-
         penalty = defaultdict(float)
 
         for (intent, error), count in self.error_frequency.items():
-
-            if query.lower() in str(intent).lower():
-
-                if count >= 3:
-                    penalty[intent] -= 3.0
+            if query.lower() in intent.lower() and count >= 3:
+                penalty[intent] -= 3.0
 
         return penalty
 
     # =========================================================
-    # BRAIN INFLUENCE
+    # BRAIN
     # =========================================================
-
     def _brain(self, brain):
-
         if not brain:
             return {}
 
-        return dict(brain.strategy_score)
+        return getattr(brain, "strategy_score", {})
 
     # =========================================================
-    # CORE MERGE (INTELIGÊNCIA FINAL)
+    # MERGE ENGINE
     # =========================================================
-
     def _merge(self, rag, tags, exec_scores, loop_penalty, brain_scores):
 
         ranking = {}
 
-        # RAG base
-        for path, content in rag:
-            ranking[path] = {"content": content, "score": 1.0}
+        for r in rag:
+            path = r["path"]
+            content = r["content"]
 
-        # TAGS
+            score = ranking.get(path, {}).get("score", 0.0)
+
+            ranking[path] = {
+                "content": content,
+                "score": score + 1.0
+            }
+
         for path, score in tags.items():
             if path not in ranking:
                 ranking[path] = {"content": "", "score": 0.5}
-
             ranking[path]["score"] += score
 
-        # EXECUTION
-        for key, score in exec_scores.items():
-
-            path = self._resolve(key)
-
+        for intent, score in exec_scores.items():
+            path = self._resolve(intent)
             if not path:
                 continue
 
@@ -162,48 +225,53 @@ class MIL:
 
             ranking[path]["score"] += score
 
-        # LOOP PENALTY
-        for key, penalty in loop_penalty.items():
-
-            path = self._resolve(key)
-
+        for intent, penalty in loop_penalty.items():
+            path = self._resolve(intent)
             if path in ranking:
                 ranking[path]["score"] += penalty
 
-        # BRAIN GLOBAL INFLUENCE
-        for value in brain_scores.values():
+        if brain_scores:
+            avg = sum(brain_scores.values()) / max(len(brain_scores), 1)
             for item in ranking.values():
-                item["score"] += value * 0.02
+                item["score"] += avg * 0.01
 
-        return sorted(ranking.items(), key=lambda x: x[1]["score"], reverse=True)
+        return sorted(
+            ranking.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True,
+        )
 
     # =========================================================
-    # LEARNING LOOP (ESSÊNCIA DO SISTEMA)
+    # LEARNING
     # =========================================================
+    def learn_from_event(self, event: EventContractV1):
 
-    def learn(self, intent, success: bool, files_used: List[str]):
+        files_used = (event.metadata or {}).get("files_used", [])
 
         for file_path in files_used:
 
-            tags = self.file_tags.get_by_file(file_path)
+            tags = self.query.get_file_tags_by_file(file_path)
 
-            for tag in tags:
+            for row in tags:
 
-                delta = 0.2 if success else -0.3
+                tag = row["tag"]
 
-                self.storage.execute("""
-                    UPDATE file_tags
-                    SET weight = weight + ?
-                    WHERE file_path = ? AND tag = ?
-                """, (delta, file_path, tag.tag))
+                delta = 0.2 if event.success else -0.3
+
+                self.file_tag_service.update_weight(
+                    file_path,
+                    tag,
+                    delta,
+                )
 
     # =========================================================
-    # HELPERS
+    # RESOLVE
     # =========================================================
-
     def _resolve(self, key: str):
-        row = self.storage.fetchall("""
-            SELECT file_path FROM file_tags WHERE tag = ? LIMIT 1
-        """, (key,))
 
-        return row[0][0] if row else None
+        results = self.query.find_file_by_tag(key)
+
+        if not results:
+            return None
+
+        return results[0]["file_path"] if results else None
